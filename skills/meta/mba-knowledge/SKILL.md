@@ -1,6 +1,6 @@
 ---
 name: mba-knowledge
-description: "Manage MBA Knowledge Base (FAQs, Websites, Files) and Skills."
+description: "Manage MBA FAQs, websites, files, and agent/UI skills."
 version: 1.0.0
 author: Amir Marmul (amirmarmul), Hermes Agent
 license: MIT
@@ -43,7 +43,6 @@ If any script reports "Missing required env" or "ConfigError: Missing required e
 skill_view(name="mba-setup")
 ```
 Then follow the skill's guided setup to create `workspace/mba/config.json` with your `access_token` and `entity_id`. All MBA scripts auto-detect this config on subsequent runs.
-- Payload templates in `assets/` — copy to `/tmp`, modify, pass via `--body-file`
 
 ## How to Run
 All operations go through the `terminal` tool invoking the skill's Python scripts.
@@ -72,7 +71,7 @@ terminal(command="python3 scripts/mba_ui_skills.py list", timeout=30)
 | Website update | `terminal(command="python3 scripts/mba_websites.py update <id> --body-file /tmp/web.json", timeout=30)` |
 | Website delete | `terminal(command="python3 scripts/mba_websites.py delete <id> --yes", timeout=30)` |
 | File list | `terminal(command="python3 scripts/mba_files.py list", timeout=30)` |
-| File upload | `terminal(command="python3 scripts/mba_files.py upload /path/to/file.pdf --name "Policy 2026"", timeout=60)` |
+| File upload | `terminal(command="python3 scripts/mba_files.py upload /path/to/file.pdf --name \"Policy 2026\"", timeout=60)` |
 | File delete | `terminal(command="python3 scripts/mba_files.py delete <id> --yes", timeout=30)` |
 | Agent Skill list | `terminal(command="python3 scripts/mba_skills.py list", timeout=30)` |
 | Agent Skill get | `terminal(command="python3 scripts/mba_skills.py get <id>", timeout=30)` |
@@ -92,6 +91,7 @@ terminal(command="python3 scripts/mba_ui_skills.py list", timeout=30)
    - Completion: Returns array of FAQ objects with `id`, `question`, `answer`, `status`.
 
 2. **Create FAQ**
+   - **FAQ schema:** load `references/faq-schema.md` before drafting the payload.
    - Copy `assets/faq.request.example.json` → `/tmp/faq.json`
    - Modify `question`, `answer` (max 1024 chars each), set `status: "ACTIVE"`
    - Run: `terminal(command="python3 scripts/mba_faq.py create --body-file /tmp/faq.json", timeout=30)`
@@ -117,6 +117,7 @@ terminal(command="python3 scripts/mba_ui_skills.py list", timeout=30)
    - Completion: Response contains `id` and `crawl_status: "in_progress"`.
 
 3. **Verify crawl readiness**
+   - **Crawl states:** load `references/website-knowledge-crawl-status.md` before trusting a source or diagnosing a stuck crawl.
    - Run: `terminal(command="python3 scripts/mba_websites.py list", timeout=30)` repeatedly until `crawl_status: "completed"` AND `pages_crawled > 0`
    - If stuck at `in_progress` with `pages_crawled: 0` for >10 min: treat as stuck; see Pitfalls.
 
@@ -126,6 +127,8 @@ terminal(command="python3 scripts/mba_ui_skills.py list", timeout=30)
 
 ### C. Knowledge: Files
 1. **Upload file**
+   - **File types:** load `references/file-knowledge-supported-types.md` before choosing a file.
+   - **User clippings:** load `references/file-knowledge-intake.md` when the source is a user-provided clipping.
    - Run: `terminal(command="python3 scripts/mba_files.py upload /path/to/file.pdf --name \"Policy 2026\"", timeout=60)`
    - Completion: Returns `id`, `name`, `status: "PROCESSED"` (or `PROCESSING` → poll `get`).
 
@@ -137,6 +140,7 @@ terminal(command="python3 scripts/mba_ui_skills.py list", timeout=30)
    - Completion: Returns array with `id`, `name`, `instruction`, `status`.
 
 2. **Create skill**
+   - **Skill schema:** load `references/agent-skill-authoring-rules.md` before drafting the payload.
    - Copy `assets/skill.request.example.json` → `/tmp/skill.json`
    - Set `name`, `instruction` (max 8192 chars), `status: "ACTIVE"`
    - Run: `terminal(command="python3 scripts/mba_skills.py create --body-file /tmp/skill.json", timeout=30)`
@@ -153,6 +157,7 @@ terminal(command="python3 scripts/mba_ui_skills.py list", timeout=30)
    - Completion: Returns array with `id`, `component_type`, `trigger_instruction`, `status`.
 
 2. **Create UI skill**
+   - **UI patterns:** load `references/ui-skills-workflow.md` before drafting the payload.
    - Copy `assets/uiskill.request.example.json` → `/tmp/uiskill.json`
    - Set `component_type` (`button`, `list`, `flow`), `trigger_instruction`, `payload`
    - For `flow` type: verify referenced Flow ID exists and is published before enabling
@@ -165,7 +170,8 @@ terminal(command="python3 scripts/mba_ui_skills.py list", timeout=30)
 3. Run: `terminal(command="python3 scripts/mba_knowledge.py skills list", timeout=30)` — check for behavior instructions that cause invented facts (e.g., "look up contact info" without fallback).
 4. Run: `terminal(command="python3 scripts/mba_ui_skills.py list", timeout=30)` — ensure agent can send correct UI components instead of hallucinating links.
 5. If runtime tests fail with `ELIGIBILITY_CHECK_FAILED`, pivot to `mba-onboard` checks first.
-6. Categorize findings: stale facts, unsupported claims, missing sources, risky instructions, broken UI, blocked runtime.
+   - **Business info branch:** load `references/business-info-schema.md` when the audit covers Business Info fields.
+6. Categorize findings: stale facts, unsupported claims, missing sources, risky instructions, broken UI, blocked runtime. Load `references/company-knowledge-audit-checklist.md` for the source-validation rubric.
 7. For dated operational facts (holiday hours, "besok", event dates): recommend delete/replace unless current calendar provided.
 8. For credibility claims (client counts, certifications, "only BSP"): require verifiable sources (website, PDF, certificates) before promoting.
 
@@ -176,6 +182,7 @@ terminal(command="python3 scripts/mba_ui_skills.py list", timeout=30)
 - **Connector-backed behavior skills** — must name the connector tool, define deterministic routing, include exception handling, prohibit invented data not from connector response. For promo/voucher flows: explicitly forbid listing promos/vouchers unless returned by connector.
 - **Runtime test safety** — when opening `ai_audience` beyond `ALLOWLISTED_ONLY` for validation, save rollback payload first, run tests immediately, restore audience setting.
 - **Destructive ops require `--yes`** — all `delete` commands refuse without it.
+- **Rejected `.md`/`.txt` upload:** load `references/file-knowledge-markdown-to-pdf.md` for the conversion-to-PDF pattern.
 - **Payload generation** — never invent JSON; always use templates in `assets/`.
 
 ## Verification

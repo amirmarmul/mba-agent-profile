@@ -1,6 +1,6 @@
 ---
 name: mba-onboard
-description: "Onboard phones to MBA, check eligibility, manage settings."
+description: "Onboard phones: eligibility, settings, rollout allowlist."
 version: 1.0.0
 author: Amir Marmul (amirmarmul), Hermes Agent
 license: MIT
@@ -77,6 +77,7 @@ terminal(command="python3 scripts/mba_allowlist.py remove <entry_id> --yes", tim
 - Completion: Output shows `rollout.enabled`, `handoff.enabled`, `followup.enabled`, `ai_audience` — record these as baseline.
 
 ### 3. Update settings (if needed)
+- **Settings schema:** load `references/agent-settings-rules.md` before drafting `/tmp/settings.json`.
 - Copy `assets/settings.response.example.json` → `/tmp/settings.json`
 - Modify only the fields you intend to change (e.g., set `rollout.enabled: true`, `ai_audience: "ALLOWLISTED_ONLY"`)
 - Run: `terminal(command="python3 scripts/mba_settings.py update --body-file /tmp/settings.json", timeout=30)`
@@ -99,6 +100,7 @@ terminal(command="python3 scripts/mba_allowlist.py remove <entry_id> --yes", tim
 - **Allowlist changes propagate asynchronously** — a newly added number may not be recognized for ~30 seconds.
 - **Missing token capabilities yield 403** — `bizai_wa_enterprise_api_3p_access` is required; `whatsapp_business_messaging` alone is insufficient.
 - **Destructive ops require `--yes`** — `allowlist remove` refuses without it; this is intentional.
+- **Unexpected 401/403/404:** load `references/common-api-requirements.md` for the shared error matrix and required token capability.
 - **Deprecated `.env`** — if scripts detect `.env` in cwd, they print a warning to migrate to `workspace/mba/config.json` via `mba-setup`.
 
 ## Verification

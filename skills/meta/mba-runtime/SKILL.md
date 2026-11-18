@@ -60,8 +60,8 @@ terminal(command="python3 scripts/mba_runtime.py event <consumer_wa_id> --body-f
 ## Quick Reference
 | Operation | Command |
 |-----------|---------|
-| Test agent (single turn) | `terminal(command="python3 scripts/mba_test.py "message" --save", timeout=30)` |
-| Test agent (multi-turn) | `terminal(command="python3 scripts/mba_test.py \\"followup\\" --conversation-id <conv_id> --save", timeout=30)` |
+| Test agent (single turn) | `terminal(command="python3 scripts/mba_test.py \"message\" --save", timeout=30)` |
+| Test agent (multi-turn) | `terminal(command="python3 scripts/mba_test.py \"followup\" --conversation-id <conv_id> --save", timeout=30)` |
 | List eval cases | `terminal(command="python3 scripts/mba_eval.py cases", timeout=30)` |
 | Run eval job | `terminal(command="python3 scripts/mba_eval.py run --eval-case-ids pfbid1,pfbid2 --body-file /tmp/eval.json", timeout=60)` |
 | Eval job status | `terminal(command="python3 scripts/mba_eval.py status <job_id>", timeout=30)` |
@@ -73,6 +73,8 @@ terminal(command="python3 scripts/mba_runtime.py event <consumer_wa_id> --body-f
 | Event status | `terminal(command="python3 scripts/mba_runtime.py event-status <event_id>", timeout=30)` |
 
 ## Procedure
+**Rollout gate:** load `references/agent-test-eval-handoff-rules.md` before any test, eval, or thread-control run.
+
 ### A. Test Agent
 1. **Single-turn test**
    - Run: `terminal(command="python3 scripts/mba_test.py \"Apa jam operasional hari ini?\" --save", timeout=30)`
@@ -120,6 +122,7 @@ terminal(command="python3 scripts/mba_runtime.py event <consumer_wa_id> --body-f
 
 ### D. Agent Events
 1. **Trigger asynchronous event (e.g., handoff request)**
+   - **Event schema:** load `references/agent-events-rules.md` before drafting the payload.
    - Copy `assets/event.handoff.example.json` → `/tmp/event.json`
    - Set `type: "handoff_event"`, `description`, `payload` (JSON string with `reason`, `priority`)
    - Run: `terminal(command="python3 scripts/mba_runtime.py event <consumer_wa_id> --body-file /tmp/event.json", timeout=30)`

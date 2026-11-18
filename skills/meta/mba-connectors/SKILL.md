@@ -1,6 +1,6 @@
 ---
 name: mba-connectors
-description: "Manage MBA Connectors and Tools for external API access."
+description: "Manage MBA connectors, tools, auth, and logs."
 version: 1.0.0
 author: Amir Marmul (amirmarmul), Hermes Agent
 license: MIT
@@ -77,6 +77,8 @@ terminal(command="python3 scripts/mba_connector_tools.py run <connector_id> <too
 
 ## Procedure
 ### A. Connectors CRUD
+**Connector schema:** load `references/connector-schema-rules.md` before drafting a connector payload.
+
 1. **List connectors**
    - Run: `terminal(command="python3 scripts/mba_connectors.py list", timeout=30)`
    - Completion: Returns array with `id`, `name`, `base_url`, `auth_type`, `description`.
@@ -100,9 +102,11 @@ terminal(command="python3 scripts/mba_connector_tools.py run <connector_id> <too
    - Completion: Re-run `list` to confirm removal; see Pitfalls for delete/archive quirks.
 
 ### B. Connector API Key Auth
+**Auth schema:** load `references/connector-schema-rules.md` for the `auth_config` shape before drafting `/tmp/auth.json`.
+
 1. **Upload API key credentials**
    - Copy `assets/connector.auth.example.json` → `/tmp/auth.json`
-   - Set `api_key_location` (`HEADER` or `QUERY_PARAM`), `api_key_name`, `api_key_value`
+   - Keep the `api_key_config` wrapper; inside it put `headers` / `query_params` / `body_params` arrays. Each param needs `field_name` + `value`, with optional `prefix` (e.g. `Bearer `). Do not send `auth_config`, `api_key_location`, or `api_key_name`.
    - Run: `terminal(command="python3 scripts/mba_connectors.py auth <id> --body-file /tmp/auth.json", timeout=30)`
    - Completion: Response confirms auth config; re-run `get <id>` to verify.
 
@@ -112,6 +116,8 @@ terminal(command="python3 scripts/mba_connector_tools.py run <connector_id> <too
    - Completion: Returns failure logs with timestamps, status codes, error bodies; stats summary included.
 
 ### D. Connector Tools CRUD
+**Tool schema:** load `references/tool-schema-authoring-rules.md` before drafting `/tmp/tool.json`; every parameter needs a description.
+
 1. **List tools under a connector**
    - Run: `terminal(command="python3 scripts/mba_connector_tools.py list <connector_id>", timeout=30)`
    - Completion: Returns array with `id`, `name`, `description`, `method`, `path`, `status`.
@@ -122,6 +128,7 @@ terminal(command="python3 scripts/mba_connector_tools.py run <connector_id> <too
    - **Trailing slash on create endpoint matters** — see Pitfalls.
    - Run: `terminal(command="python3 scripts/mba_connector_tools.py create <connector_id> --body-file /tmp/tool.json", timeout=30)`
    - Completion: Response contains `id` and `status: "PROVISIONING"` (or similar).
+   - **Per-user auth:** if the tool needs an end-user credential, load `references/tool-user-auth-patterns.md` before setting `user_auth_required: true`.
 
 3. **Update tool**
    - Run `get <connector_id> <tool_id>` → save → modify → `update --body-file`
@@ -147,6 +154,7 @@ After any create/update/delete, verify real state in this order:
 
 ## Pitfalls
 - **Trailing slash on create endpoints** — `POST .../agent_connectors/` succeeds; `POST .../agent_connectors` (no slash) can return HTTP 500. Same applies to `.../tools/` create. Preserve trailing `/` on create calls.
+- **HTTP 500 with unclear cause:** load `references/membrane-api-quirks.md` for the debug sequence (trailing slash, User-Agent, Content-Type).
 - **User-Agent affects Membrane behavior** — Python `urllib` default UA differs from `curl`. When troubleshooting parity issues, compare `User-Agent` explicitly; scripts send `User-Agent: curl/7.68.0` for consistency.
 - **500 Membrane partial-success pattern** — HTTP 500 `Authorization failed` during create/update/delete can occur even when config-store mutation partially succeeds. Always verify with `list/get` before concluding total failure.
 - **Provisioning lag / pending action_id** — A tool can appear in `list`/`get` yet fail `run` with `Tool is not yet provisioned in Membrane (action_id is pending)`. Treat list/get success as metadata-only; tool is not usable until `run` succeeds.

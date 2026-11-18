@@ -162,20 +162,23 @@ Environment variables:
             return 1
 
     # Gather credentials: CLI args > env vars > interactive prompts
-    access_token = (
-        args.access_token
-        or os.getenv("META_ACCESS_TOKEN", "").strip()
-        or _prompt_if_tty("META_ACCESS_TOKEN")
-    )
+    interactive = sys.stdin.isatty()
+    access_token = args.access_token or os.getenv("META_ACCESS_TOKEN", "").strip()
+    if not access_token:
+        if not interactive:
+            print("ERROR: access token required (--access-token or META_ACCESS_TOKEN) in non-interactive mode.", file=sys.stderr)
+            return 1
+        access_token = _prompt_if_tty("META_ACCESS_TOKEN")
     while not access_token:
         print("Access token cannot be empty.", file=sys.stderr)
         access_token = _prompt_if_tty("META_ACCESS_TOKEN")
 
-    entity_id = (
-        args.entity_id
-        or os.getenv("META_ENTITY_ID", "").strip()
-        or _prompt_if_tty("META_ENTITY_ID (WhatsApp Business Phone Number ID)")
-    )
+    entity_id = args.entity_id or os.getenv("META_ENTITY_ID", "").strip()
+    if not entity_id:
+        if not interactive:
+            print("ERROR: entity ID required (--entity-id or META_ENTITY_ID) in non-interactive mode.", file=sys.stderr)
+            return 1
+        entity_id = _prompt_if_tty("META_ENTITY_ID (WhatsApp Business Phone Number ID)")
     while not entity_id:
         print("Entity ID cannot be empty.", file=sys.stderr)
         entity_id = _prompt_if_tty("META_ENTITY_ID")
