@@ -8,7 +8,7 @@ platforms: [linux, macos, windows]
 metadata:
   hermes:
     tags: [meta-business-agent, setup, config, onboarding]
-    related_skills: []
+    related_skills: [mba-onboard, mba-knowledge, mba-connectors, mba-runtime]
 ---
 # MBA Setup Skill
 
@@ -38,7 +38,7 @@ Don't use for:
 All operations go through the `terminal` tool invoking this skill's Python script.
 
 ### Setup (one-time)
-``` 
+```
 terminal(command="python3 scripts/mba_setup.py", timeout=30)
 ```
 This creates `workspace/mba/config.json` with your `access_token` and `entity_id`. Scripts will auto-detect this config on subsequent runs.
@@ -49,17 +49,17 @@ Re-run this skill and choose `y` to overwrite, or update individual values via t
 ## Quick Reference
 | Action | Command |
 |--------|---------|
-| Run setup | `python3 scripts/mba_setup.py` |
-| Check config detected | `python3 -c "from hermes_tools import; print('Config loaded')" ` |
+| Run setup | `terminal(command="python3 scripts/mba_setup.py", timeout=30)` |
+| Verify config | `terminal(command="python3 -c \"import json; from pathlib import Path; p=Path('workspace/mba/config.json'); d=json.loads(p.read_text()); print('token:', d.get('access_token','')[:4]+'...', 'entity:', d.get('entity_id',''))\"", timeout=15)` |
 
 ## Procedure
 ### 1. Run setup
 - Run: `terminal(command="python3 scripts/mba_setup.py", timeout=30)`
 - Completion: Config written to `workspace/mba/config.json`; scripts confirm auto-detection
-- Verify: Run `python3 scripts/mba_eligibility.py` — should read config and proceed
+- Verify: Config file exists at `workspace/mba/config.json` with required keys
 
 ### 2. Verify config
-- Run: `terminal(command="python3 -c \"from hermes_tools import MetaConfig; c=MetaConfig.from_env(); print('token:', c.access_token[:4]+'...', 'entity:', c.entity_id)\"", timeout=15)`
+- Run: `terminal(command="python3 -c \"import json; from pathlib import Path; p=Path('workspace/mba/config.json'); d=json.loads(p.read_text()); print('token:', d.get('access_token','')[:4]+'...', 'entity:', d.get('entity_id',''))\"", timeout=15)`
 - Completion: Shows first 4 chars of token and entity_id; no deprecation warning
 - Verify: All MBA scripts now read from workspace config
 
@@ -72,6 +72,6 @@ Re-run this skill and choose `y` to overwrite, or update individual values via t
 
 ## Verification
 - `workspace/mba/config.json` exists with `access_token`, `entity_id`, `api_version`, `base_url` keys
-- `python3 scripts/mba_eligibility.py` runs without "Missing required env" error
+- Config file passes JSON validation and contains non-empty required fields
 - All other MBA skills (`mba-onboard`, `mba-knowledge`, `mba-connectors`, `mba-runtime`) auto-detect config and no longer show deprecation warnings
 - No 401/403/404 on config-requiring API calls after setup
