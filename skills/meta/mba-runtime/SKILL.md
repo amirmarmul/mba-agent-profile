@@ -2,77 +2,146 @@
 name: mba-runtime
 description: "Test MBA routing, run evals, manage handoff, trigger events."
 version: 1.0.0
-author: Hermes Agent
+author: Amir Marmul (amirmarmul), Hermes Agent
 license: MIT
 platforms: [linux, macos, windows]
 metadata:
   hermes:
-    category: meta
     tags: [meta-business-agent, whatsapp, ai-agent, test, eval, handoff, thread-control]
+    related_skills: [mba-onboard, mba-knowledge, mba-connectors]
 ---
 
 # MBA Runtime & Eval Operator
 
 ## Overview
-This skill manages the live runtime of a Meta Business Agent. You can test prompts, run predefined evaluation cases, pass thread control (handoff) to human inboxes, and trigger Agent Events.
+This skill manages the live runtime of a Meta Business Agent. It covers sending test messages (bypassing WhatsApp delivery rules), running predefined evaluation cases, passing thread control (handoff) between the AI Agent and human inboxes, and triggering asynchronous Agent Events into conversation threads.
 
+## When to Use
+- Sending test messages to validate agent routing and answers
+- Running evaluation jobs against predefined scenarios
+- Checking eval job status and retrieving results (summary/details)
+- Passing thread control from Agent to human (handoff) or releasing back to Agent
+- Triggering asynchronous events (e.g., manual handoff requests) into a thread
 
-Use the `python3 scripts/...` commands listed below for all operations.
+Don't use for:
+- Onboarding, eligibility, settings, allowlist → use `mba-onboard`
+- Knowledge base (FAQs, Websites, Files, Skills) → use `mba-knowledge`
+- Connectors or connector tools → use `mba-connectors`
 
-## Commands
+## Prerequisites
+- Profile workspace config at `workspace/mba/config.json` (created by `mba-setup`) OR `.env` in current working directory (deprecated)
+- If using `.env`: `META_ACCESS_TOKEN` and `META_ENTITY_ID` set — run `mba-setup` to migrate to workspace config
+- Token must have:
+  - Permission: `whatsapp_business_messaging`
+  - Capability: `bizai_wa_enterprise_api_3p_access`
+- Python 3.10+ with stdlib only (scripts use `urllib`, `json`, `pathlib`)
+- For test/eval: agent must be eligible (`mba-onboard` eligibility check passes) and tester must be allowlisted if `ai_audience: "ALLOWLISTED_ONLY"`
 
-### 1. Test Agent
-Send a test message directly to the agent (bypassing normal WhatsApp delivery rules) and save the output.
-```bash
-# Single turn
-python3 scripts/mba_test.py "Apa jam operasional hari ini?" --save
+## How to Run
+All operations go through the `terminal` tool invoking the skill's Python scripts. The updated scripts now read config from `workspace/mba/config.json` first, falling back to `.env` in cwd with a deprecation warning.
 
-# Multi-turn followup (requires conversation_id from previous run)
-python3 scripts/mba_test.py "Dan besok?" --conversation-id <conv_id> --save
+### Setup (one-time)
 ```
-*Note: Saved results go to `mba/<ENTITY_ID>/tests/`. If it returns `ELIGIBILITY_CHECK_FAILED`, do not judge answer quality yet. First verify `ai_audience` and confirm the tester is allowlisted when audience is `ALLOWLISTED_ONLY` by running `python3 scripts/mba_settings.py get` and `python3 scripts/mba_allowlist.py list` from the `mba-onboard` skill. Use an allowlisted tester or add the intended tester before rerunning `mba_test.py`.*
-
-### 2. Evaluations
-Evaluate agent performance using predefined scenarios.
-```bash
-# List available eval scenarios
-python3 scripts/mba_eval.py cases
-
-# Run an eval job
-python3 scripts/mba_eval.py run --eval-case-ids pfbid1,pfbid2 --body-file /tmp/eval.json
-# (Ref payload: templates/eval.run.request.example.json)
-
-# Check status of an eval job
-python3 scripts/mba_eval.py status <job_id>
-
-# Get results
-python3 scripts/mba_eval.py summary --summary-ids <summary_id>
-python3 scripts/mba_eval.py details --eval-ids <eval_id>
+terminal(command="python3 scripts/mba_setup.py", timeout=30)
 ```
-*Note: Results are auto-saved to `mba/eval/` unless `--no-save` is passed.*
+This creates `workspace/mba/config.json` with your `access_token` and `entity_id`.
 
-### 3. Thread Control (Handoff)
-Transfer conversation control between the AI Agent and the Primary Receiver (e.g. human inbox app).
-```bash
-# Pass control from Agent to Human app
-python3 scripts/mba_runtime.py thread-control pass <consumer_wa_id>
-
-# Release control from Human app back to Agent
-python3 scripts/mba_runtime.py thread-control release <consumer_wa_id>
+### Example invocations
+```
+terminal(command="python3 scripts/mba_test.py \"Apa jam operasional?\" --save", timeout=30)
+terminal(command="python3 scripts/mba_eval.py cases", timeout=30)
+terminal(command="python3 scripts/mba_eval.py run --eval-case-ids pfbid1,pfbid2 --body-file /tmp/eval.json", timeout=60)
+terminal(command="python3 scripts/mba_runtime.py thread-control pass <consumer_wa_id>", timeout=30)
+terminal(command="python3 scripts/mba_runtime.py event <consumer_wa_id> --body-file /tmp/event.json", timeout=30)
 ```
 
-### 4. Agent Events
-Trigger asynchronous events (like manual handoff requests) into the conversation thread.
-```bash
-python3 scripts/mba_runtime.py event <consumer_wa_id> --body-file /tmp/event.json
-python3 scripts/mba_runtime.py event-status <event_id>
-```
-*Ref payload: `templates/event.handoff.example.json`*
+## Quick Reference
+| Operation | Command |
+|-----------|---------|
+| Test agent (single turn) | `python3 scripts/mba_test.py "message" --save` |
+| Test agent (multi-turn) | `python3 scripts/mba_test.py "followup" --conversation-id <conv_id> --save` |
+| List eval cases | `python3 scripts/mba_eval.py cases` |
+| Run eval job | `python3 scripts/mba_eval.py run --eval-case-ids pfbid1,pfbid2 --body-file /tmp/eval.json` |
+| Eval job status | `python3 scripts/mba_eval.py status <job_id>` |
+| Eval summary | `python3 scripts/mba_eval.py summary --summary-ids <summary_id>` |
+| Eval details | `python3 scripts/mba_eval.py details --eval-ids <eval_id>` |
+| Handoff: pass to human | `python3 scripts/mba_runtime.py thread-control pass <consumer_wa_id>` |
+| Handoff: release to agent | `python3 scripts/mba_runtime.py thread-control release <consumer_wa_id>` |
+| Trigger event | `python3 scripts/mba_runtime.py event <consumer_wa_id> --body-file /tmp/event.json` |
+| Event status | `python3 scripts/mba_runtime.py event-status <event_id>` |
 
-## Important Rules
-- **Payload Generation**: Never invent JSON structures. Use the examples in `templates/` (inside this skill directory) as reference. Copy them to `/tmp`, modify, and supply via `--body-file`.
-- **No Direct API**: Never use `curl`. Always use `python3 scripts/mba_runtime.py`.
+## Procedure
+### A. Test Agent
+1. **Single-turn test**
+   - Run: `terminal(command="python3 scripts/mba_test.py \"Apa jam operasional hari ini?\" --save", timeout=30)`
+   - Completion: Returns `conversation_id`, `response_text`, `tool_calls` (if any), `elapsed_ms`. Saved to `workspace/mba/<ENTITY_ID>/tests/`.
 
-### References
-- `references/agent-test-eval-handoff-rules.md` - Test vs Eval payloads and thread handoff flow.
-- `references/agent-events-rules.md` - Payload schema and rules for pushing events to agent memory.
+2. **Multi-turn follow-up**
+   - Use `conversation_id` from previous run
+   - Run: `terminal(command="python3 scripts/mba_test.py \"Dan besok?\" --conversation-id <conv_id> --save", timeout=30)`
+   - Completion: Returns continued conversation with new response; same `conversation_id`.
+
+3. **Eligibility/allowlist gate**
+   - If response contains `ELIGIBILITY_CHECK_FAILED`: **do not judge answer quality**.
+   - Run `mba-onboard` → `mba_settings.py get` (check `ai_audience`) and `mba_allowlist.py list`
+   - If `ai_audience: "ALLOWLISTED_ONLY"`, add tester via `mba_allowlist.py add --entity <tester_wa_id>`
+   - Re-run test after allowlist propagation (~30s).
+
+### B. Evaluations
+1. **List available eval cases**
+   - Run: `terminal(command="python3 scripts/mba_eval.py cases", timeout=30)`
+   - Completion: Returns array of case objects with `id`, `name`, `description`, `turns`.
+
+2. **Run eval job**
+   - Copy `templates/eval.run.request.example.json` → `/tmp/eval.json`
+   - Set `eval_case_ids` (array), optional `config_overrides`
+   - Run: `terminal(command="python3 scripts/mba_eval.py run --eval-case-ids pfbid1,pfbid2 --body-file /tmp/eval.json", timeout=60)`
+   - Completion: Returns `job_id`; job runs asynchronously.
+
+3. **Check job status**
+   - Run: `terminal(command="python3 scripts/mba_eval.py status <job_id>", timeout=30)`
+   - Completion: Returns `status` (`PENDING`/`RUNNING`/`COMPLETED`/`FAILED`), progress metrics.
+
+4. **Retrieve results**
+   - Summary: `terminal(command="python3 scripts/mba_eval.py summary --summary-ids <summary_id>", timeout=30)` — aggregate metrics.
+   - Details: `terminal(command="python3 scripts/mba_eval.py details --eval-ids <eval_id>", timeout=30)` — per-turn breakdown.
+   - Completion: Results auto-saved to `workspace/mba/<ENTITY_ID>/eval/` unless `--no-save`.
+
+### C. Thread Control (Handoff)
+1. **Pass control from Agent to Human (Primary Receiver)**
+   - Run: `terminal(command="python3 scripts/mba_runtime.py thread-control pass <consumer_wa_id>", timeout=30)`
+   - Completion: Returns `thread_control_state: "HUMAN"`; human inbox now owns the thread.
+
+2. **Release control from Human back to Agent**
+   - Run: `terminal(command="python3 scripts/mba_runtime.py thread-control release <consumer_wa_id>", timeout=30)`
+   - Completion: Returns `thread_control_state: "AGENT"`; agent resumes ownership.
+
+### D. Agent Events
+1. **Trigger asynchronous event (e.g., handoff request)**
+   - Copy `templates/event.handoff.example.json` → `/tmp/event.json`
+   - Set `type: "handoff_event"`, `description`, `payload` (JSON string with `reason`, `priority`)
+   - Run: `terminal(command="python3 scripts/mba_runtime.py event <consumer_wa_id> --body-file /tmp/event.json", timeout=30)`
+   - Completion: Returns `event_id`; event queued for delivery.
+
+2. **Check event status**
+   - Run: `terminal(command="python3 scripts/mba_runtime.py event-status <event_id>", timeout=30)`
+   - Completion: Returns `status` (`DELIVERED`/`FAILED`/`PENDING`), timestamps.
+
+## Pitfalls
+- **ELIGIBILITY_CHECK_FAILED on test** — not an answer quality issue. Verify `mba-onboard` eligibility, `ai_audience`, and allowlist membership first.
+- **Allowlist propagation delay** — newly added testers may not be recognized for ~30 seconds after `mba_allowlist.py add`.
+- **Eval job async** — `run` returns `job_id` immediately; poll `status` until `COMPLETED` or `FAILED` before fetching results.
+- **Handoff requires valid consumer_wa_id** — must be a WhatsApp user who has messaged the business; unknown IDs return 404.
+- **Event payload must be JSON string** — `payload` field in `event.handoff.example.json` is a stringified JSON object, not a nested object.
+- **Destructive ops** — no destructive commands in this skill, but eval jobs consume quota; avoid unnecessary runs.
+- **Payload generation** — never invent JSON; always use templates in `templates/`.
+
+## Verification
+- Test single-turn returns `conversation_id`, `response_text`, no `ELIGIBILITY_CHECK_FAILED`
+- Test multi-turn continues same `conversation_id` with new response
+- Eval cases list returns non-empty array with valid case IDs
+- Eval run → status → summary/details chain completes with `COMPLETED` status and metrics
+- Handoff pass returns `thread_control_state: "HUMAN"`; release returns `thread_control_state: "AGENT"`
+- Event trigger returns `event_id`; event-status eventually shows `DELIVERED`
+- All results auto-saved to `workspace/mba/<ENTITY_ID>/tests/` and `workspace/mba/<ENTITY_ID>/eval/` respectively
+- No 401/403/404 on any operation

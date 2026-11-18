@@ -2,53 +2,105 @@
 name: mba-onboard
 description: "Onboard phones to MBA, check eligibility, manage settings."
 version: 1.0.0
-author: Hermes Agent
+author: Amir Marmul (amirmarmul), Hermes Agent
 license: MIT
 platforms: [linux, macos, windows]
 metadata:
   hermes:
-    category: meta
     tags: [meta-business-agent, whatsapp, ai-agent, onboard, allowlist]
+    related_skills: [mba-knowledge, mba-connectors, mba-runtime]
 ---
 
 # MBA Onboard Operator
 
 ## Overview
-This skill guides the agent to perform onboarding and environment setup for a Meta Business Agent. You manage entity eligibility, generic settings, and the rollout allowlist.
+This skill manages the initial onboarding and environment setup for a Meta Business Agent. It covers entity eligibility checks, agent settings (audience, rollout, handoff, follow-up), and the rollout allowlist for controlled launches.
 
+## When to Use
+- First-time MBA setup for a WhatsApp Business Phone Number ID
+- Changing agent audience between `ALLOWLISTED_ONLY` and `EVERYONE`
+- Enabling/disabling rollout, handoff, or follow-up features
+- Adding or removing test numbers from the allowlist during validation
+- Verifying eligibility before investing in knowledge/connectors/runtime work
 
-Use the `python3 scripts/...` commands listed below for all operations.
+Don't use for:
+- Managing FAQs, websites, files, or agent skills → use `mba-knowledge`
+- Creating connectors or connector tools → use `mba-connectors`
+- Running test messages, evals, handoffs, or events → use `mba-runtime`
 
-## Commands
+## Prerequisites
+- Profile workspace config at `workspace/mba/config.json` (created by `mba-setup`) OR `.env` in current working directory (deprecated)
+- If using `.env`: `META_ACCESS_TOKEN` and `META_ENTITY_ID` set — run `mba-setup` to migrate to workspace config
+- Token must have:
+  - Permission: `whatsapp_business_messaging`
+  - Capability: `bizai_wa_enterprise_api_3p_access`
+- Python 3.10+ with stdlib only (scripts use `urllib`, `json`, `pathlib`)
 
-### 1. Check Eligibility
-Check if the current entity ID is eligible to operate an MBA.
-```bash
-python3 scripts/mba_eligibility.py
+## How to Run
+All operations go through the `terminal` tool invoking the skill's Python scripts. The updated scripts now read config from `workspace/mba/config.json` first, falling back to `.env` in cwd with a deprecation warning.
+
+### Setup (one-time)
+```
+terminal(command="python3 scripts/mba_setup.py", timeout=30)
+```
+This creates `workspace/mba/config.json` with your `access_token` and `entity_id`.
+
+### Example invocations
+```
+terminal(command="python3 scripts/mba_eligibility.py", timeout=30)
+terminal(command="python3 scripts/mba_settings.py get", timeout=30)
+terminal(command="python3 scripts/mba_settings.py update --body-file /tmp/settings.json", timeout=30)
+terminal(command="python3 scripts/mba_allowlist.py list", timeout=30)
+terminal(command="python3 scripts/mba_allowlist.py add --entity +628xxxxxxxxx", timeout=30)
+terminal(command="python3 scripts/mba_allowlist.py remove <entry_id> --yes", timeout=30)
 ```
 
-### 2. Manage Settings
-Manage high-level agent settings (like AI Audience, Handoff availability).
-```bash
-python3 scripts/mba_settings.py get
-```
-*To update settings, read `templates/settings.response.example.json` (inside this skill directory), modify values, save to a temp file (e.g. `/tmp/settings.json`), and run:*
-```bash
-python3 scripts/mba_settings.py update --body-file /tmp/settings.json
-```
+## Quick Reference
+| Operation | Command |
+|-----------|---------|
+| Check eligibility | `python3 scripts/mba_eligibility.py` |
+| Get settings | `python3 scripts/mba_settings.py get` |
+| Update settings | `python3 scripts/mba_settings.py update --body-file /tmp/settings.json` |
+| List allowlist | `python3 scripts/mba_allowlist.py list` |
+| Add to allowlist | `python3 scripts/mba_allowlist.py add --entity +628xxxxxxxxx` |
+| Remove from allowlist | `python3 scripts/mba_allowlist.py remove <entry_id> --yes` |
 
-### 3. Allowlist Management
-For safety, MBA rollouts often start in `ALLOWLISTED_ONLY` mode.
-```bash
-python3 scripts/mba_allowlist.py list
-python3 scripts/mba_allowlist.py add --entity +628****7890
-python3 scripts/mba_allowlist.py remove <entry_id> --yes
-```
+## Procedure
+### 1. Check eligibility
+- Run: `terminal(command="python3 scripts/mba_eligibility.py", timeout=30)`
+- Completion: JSON output contains `"eligible": true` and `"entity_id"` matching your `META_ENTITY_ID`.
 
-## Important Rules
-- **Destructive Actions**: Always require the `--yes` flag (e.g., `remove`).
-- **No Direct API**: Never use `curl` or manual python requests. Always use `python3 scripts/mba_onboard.py`.
-- **Payload Generation**: Never invent JSON structures. Use the examples in `templates/` (inside this skill directory) as your reference.
-### References
-- `references/agent-settings-rules.md` - Schema for AI audience, handoff, and rollout settings.
-- `references/common-api-requirements.md` - Required tokens, capabilities, and shared error codes.
+### 2. Inspect current settings
+- Run: `terminal(command="python3 scripts/mba_settings.py get", timeout=30)`
+- Completion: Output shows `rollout.enabled`, `handoff.enabled`, `followup.enabled`, `ai_audience` — record these as baseline.
+
+### 3. Update settings (if needed)
+- Copy `templates/settings.response.example.json` → `/tmp/settings.json`
+- Modify only the fields you intend to change (e.g., set `rollout.enabled: true`, `ai_audience: "ALLOWLISTED_ONLY"`)
+- Run: `terminal(command="python3 scripts/mba_settings.py update --body-file /tmp/settings.json", timeout=30)`
+- Completion: Response echoes updated settings; re-run `get` to confirm persistence.
+
+### 4. Configure allowlist for controlled rollout
+- Run: `terminal(command="python3 scripts/mba_allowlist.py list", timeout=30)` — note current entries.
+- For each test number: `terminal(command="python3 scripts/mba_allowlist.py add --entity +628xxxxxxxxx", timeout=30)`
+- Completion: Each add returns an object with `id` and `consumer_phone_number`; verify with `list`.
+
+### 5. Verify end-to-end readiness
+- Run eligibility → expect `eligible: true`
+- Run settings get → expect `rollout.enabled: true`, `ai_audience: "ALLOWLISTED_ONLY"` (or intended value)
+- Run allowlist list → expect your test numbers present
+- Completion: All three checks pass; agent is ready for knowledge/connector/runtime work.
+
+## Pitfalls
+- **META_ENTITY_ID must be the Phone Number ID** — using the WABA ID returns 404 on all endpoints.
+- **500 on settings update can be partial success** — always re-run `get` to verify the write landed.
+- **Allowlist changes propagate asynchronously** — a newly added number may not be recognized for ~30 seconds.
+- **Missing token capabilities yield 403** — `bizai_wa_enterprise_api_3p_access` is required; `whatsapp_business_messaging` alone is insufficient.
+- **Destructive ops require `--yes`** — `allowlist remove` refuses without it; this is intentional.
+- **Deprecated `.env`** — if scripts detect `.env` in cwd, they print a warning to migrate to `workspace/mba/config.json` via `mba-setup`.
+
+## Verification
+- Eligibility check returns `{"eligible": true, "entity_id": "<META_ENTITY_ID>"}`
+- Settings get shows all four top-level keys: `rollout`, `handoff`, `followup`, `ai_audience`
+- Allowlist list returns an array containing each test number with a stable `id`
+- No 401/403/404 errors on any of the above calls

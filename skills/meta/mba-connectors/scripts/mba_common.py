@@ -20,6 +20,13 @@ from typing import Any
 DEFAULT_BASE_URL = "https://api.facebook.com"
 DEFAULT_API_VERSION = "2.0.0"
 
+# Profile workspace config path (Hermes profile root + workspace/mba/config.json)
+def _profile_workspace_config_path() -> Path:
+    """Return the profile workspace config path: <HERMES_PROFILE_DIR>/workspace/mba/config.json"""
+    profile_dir = os.getenv("HERMES_PROFILE_DIR") or os.getcwd()
+    return Path(profile_dir) / "workspace" / "mba" / "config.json"
+
+
 class ConfigError(RuntimeError):
     """Raised when required environment is missing."""
 
@@ -33,10 +40,39 @@ class MetaConfig:
 
     @classmethod
     def from_env(cls) -> "MetaConfig":
+        # 1) Try profile workspace config first
+        workspace_config = _profile_workspace_config_path()
+        if workspace_config.exists():
+            try:
+                data = json.loads(workspace_config.read_text(encoding="utf-8"))
+                access_token = data.get("access_token", "").strip()
+                entity_id = data.get("entity_id", "").strip()
+                api_version = data.get("api_version", DEFAULT_API_VERSION).strip() or DEFAULT_API_VERSION
+                base_url = data.get("base_url", DEFAULT_BASE_URL).strip() or DEFAULT_BASE_URL
+
+                missing: list[str] = []
+                if not access_token:
+                    missing.append("access_token (in workspace config)")
+                if not entity_id:
+                    missing.append("entity_id (in workspace config)")
+                if not missing:
+                    return cls(
+                        access_token=access_token,
+                        entity_id=entity_id,
+                        api_version=api_version,
+                        base_url=base_url.rstrip("/"),
+                    )
+            except (json.JSONDecodeError, OSError):
+                pass  # fall through to .env
+
+        # 2) Fallback: .env in current working directory (deprecated)
         access_token = os.getenv("META_ACCESS_TOKEN", "").strip()
         entity_id = os.getenv("META_ENTITY_ID", "").strip()
         api_version = os.getenv("META_API_VERSION", DEFAULT_API_VERSION).strip() or DEFAULT_API_VERSION
-        base_url = os.getenv("META_BASE_URL", DEFAULT_BASE_URL).strip() or DEFAULT_BASE_URL
+        base_url = os.getenv("META_BASE_URL", DEFAULT_BASE_URL).strip() or DEFAULT_BASE_VERSION
+
+        if access_token and entity_id:
+            print("WARNING: .env config is deprecated. Run 'mba-setup' to migrate to workspace/mba/config.json", file=sys.stderr)
 
         missing: list[str] = []
         if not access_token:
@@ -44,7 +80,7 @@ class MetaConfig:
         if not entity_id:
             missing.append("META_ENTITY_ID")
         if missing:
-            raise ConfigError("Missing required env: " + ", ".join(missing))
+            raise ConfigError("Missing required env: " + ", ".join(missing) + ". Run 'mba-setup' to configure.")
 
         return cls(
             access_token=access_token,
@@ -156,11 +192,17 @@ def print_json(value: Any) -> None:
     print(json.dumps(value, indent=2, ensure_ascii=False, sort_keys=True))
 
 
-def write_run_output(kind: str, payload: Any, prefix: str = "run") -> Path:
+def _workspace_output_root(entity_id: str) -> Path:
+    """Return workspace/mba/<ENTITY_ID>/ under the profile workspace."""
+    profile_dir = os.getenv("HERMES_PROFILE_DIR") or os.getcwd()
+    return Path(profile_dir) / "workspace" / "mba" / entity_id
+
+
+def write_run_output(kind: str, payload: Any, prefix: str = "run", skill: str = "connectors") -> Path:
     config = MetaConfig.from_env()
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     safe_prefix = "".join(ch if ch.isalnum() or ch in "-_" else "-" for ch in prefix).strip("-") or "run"
-    out_dir = Path("mba") / config.entity_id / kind
+    out_dir = _workspace_output_root(config.entity_id) / skill / kind
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / f"{timestamp}-{safe_prefix}.json"
     out_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
@@ -170,7 +212,7 @@ def write_run_output(kind: str, payload: Any, prefix: str = "run") -> Path:
 def add_save_arg(parser: argparse.ArgumentParser, default: bool = False) -> None:
     action = "store_true" if not default else "store_false"
     flag = "--save" if not default else "--no-save"
-    parser.add_argument(flag, action=action, dest="save", default=default, help="Save response JSON under mba/")
+    parser.add_argument(flag, action=action, dest="save", default=default, help="Save response JSON under workspace/mba/<ENTITY_ID>/<skill>/")
 
 
 def add_yes_arg(parser: argparse.ArgumentParser) -> None:

@@ -1,103 +1,185 @@
 ---
 name: mba-knowledge
-description: "Manage MBA Knowledge Base (FAQs, Websites) and Skills."
+description: "Manage MBA Knowledge Base (FAQs, Websites, Files) and Skills."
 version: 1.0.0
-author: Hermes Agent
+author: Amir Marmul (amirmarmul), Hermes Agent
 license: MIT
 platforms: [linux, macos, windows]
 metadata:
   hermes:
-    category: meta
     tags: [meta-business-agent, whatsapp, ai-agent, knowledge, faq, skills]
+    related_skills: [mba-onboard, mba-connectors, mba-runtime]
 ---
 
 # MBA Knowledge & Skills Operator
 
 ## Overview
-This skill manages what the agent knows (Knowledge) and how it behaves (Skills/Instructions).
-Knowledge facts (FAQs, PDFs, Websites) ground the agent's answers. Skills define its tone and behavior constraints.
+This skill manages what the agent knows (Knowledge: FAQs, Websites, Files) and how it behaves (Agent Skills/Instructions, UI Skills). Knowledge grounds the agent's answers; Skills define tone, behavior constraints, and interactive components.
 
-## Environment & Tooling
-Before executing operations, ensure the `.env` file containing `META_ACCESS_TOKEN` and `META_ENTITY_ID` exists in the user's current working directory.
+## When to Use
+- Creating, updating, listing, or deleting FAQs, Website sources, or File uploads
+- Authoring or mutating Agent Skills (behavior instructions) and UI Skills (interactive components)
+- Auditing company information validity across all knowledge sources
+- Verifying crawl status of Website knowledge before relying on it
 
-Use the `python3 scripts/...` commands listed below for all operations.
+Don't use for:
+- Onboarding, eligibility, settings, allowlist → use `mba-onboard`
+- Creating connectors or connector tools → use `mba-connectors`
+- Running test messages, evals, handoffs, events → use `mba-runtime`
 
-## Commands
+## Prerequisites
+- Profile workspace config at `workspace/mba/config.json` (created by `mba-setup`) OR `.env` in current working directory (deprecated)
+- If using `.env`: `META_ACCESS_TOKEN` and `META_ENTITY_ID` set — run `mba-setup` to migrate to workspace config
+- Token must have:
+  - Permission: `whatsapp_business_messaging`
+  - Capability: `bizai_wa_enterprise_api_3p_access`
+- Python 3.10+ with stdlib only (scripts use `urllib`, `json`, `pathlib`, `mimetypes`)
+- Payload templates in `templates/` — copy to `/tmp`, modify, pass via `--body-file`
 
-### 1. Knowledge: FAQs
-```bash
-python3 scripts/mba_faq.py list
-python3 scripts/mba_faq.py get <id>
-python3 scripts/mba_faq.py create --body-file /tmp/faq.json
-python3 scripts/mba_faq.py update <id> --body-file /tmp/faq.json
-python3 scripts/mba_faq.py delete <id> --yes
+## How to Run
+All operations go through the `terminal` tool invoking the skill's Python scripts. The updated scripts now read config from `workspace/mba/config.json` first, falling back to `.env` in cwd with a deprecation warning.
+
+### Setup (one-time)
 ```
-*Ref payload: `templates/faq.request.example.json`*
-
-### 2. Knowledge: Websites
-```bash
-python3 scripts/mba_websites.py list
-python3 scripts/mba_websites.py get <id>
-python3 scripts/mba_websites.py create --body-file /tmp/web.json
-python3 scripts/mba_websites.py update <id> --body-file /tmp/web.json
-python3 scripts/mba_websites.py delete <id> --yes
+terminal(command="python3 scripts/mba_setup.py", timeout=30)
 ```
-*Ref payload: `templates/websites.request.example.json`*
+This creates `workspace/mba/config.json` with your `access_token` and `entity_id`.
 
-### 3. Knowledge: Files
-```bash
-python3 scripts/mba_files.py list
-python3 scripts/mba_files.py get <id>
-python3 scripts/mba_files.py upload /path/to/file.pdf --name "Policy 2026"
-python3 scripts/mba_files.py delete <id> --yes
+### Example invocations
+```
+terminal(command="python3 scripts/mba_faq.py list", timeout=30)
+terminal(command="python3 scripts/mba_knowledge.py faq create --body-file /tmp/faq.json", timeout=30)
+terminal(command="python3 scripts/mba_knowledge.py web list", timeout=30)
+terminal(command="python3 scripts/mba_files.py upload /path/to/file.pdf --name \"Policy 2026\"", timeout=60)
+terminal(command="python3 scripts/mba_skills.py list", timeout=30)
+terminal(command="python3 scripts/mba_ui_skills.py list", timeout=30)
 ```
 
-### 4. Agent Skills (Behavior Instructions)
-```bash
-python3 scripts/mba_skills.py list
-python3 scripts/mba_skills.py get <id>
-python3 scripts/mba_skills.py create --body-file /tmp/skill.json
-python3 scripts/mba_skills.py update <id> --body-file /tmp/skill.json
-python3 scripts/mba_skills.py delete <id> --yes
-```
-*Ref payload: `templates/skill.request.example.json`*
+## Quick Reference
+| Operation | Command |
+|-----------|---------|
+| FAQ list | `python3 scripts/mba_faq.py list` |
+| FAQ get | `python3 scripts/mba_faq.py get <id>` |
+| FAQ create | `python3 scripts/mba_faq.py create --body-file /tmp/faq.json` |
+| FAQ update | `python3 scripts/mba_faq.py update <id> --body-file /tmp/faq.json` |
+| FAQ delete | `python3 scripts/mba_faq.py delete <id> --yes` |
+| Website list | `python3 scripts/mba_websites.py list` |
+| Website get | `python3 scripts/mba_websites.py get <id>` |
+| Website create | `python3 scripts/mba_websites.py create --body-file /tmp/web.json` |
+| Website update | `python3 scripts/mba_websites.py update <id> --body-file /tmp/web.json` |
+| Website delete | `python3 scripts/mba_websites.py delete <id> --yes` |
+| File list | `python3 scripts/mba_files.py list` |
+| File upload | `python3 scripts/mba_files.py upload /path/to/file.pdf --name "Policy 2026"` |
+| File delete | `python3 scripts/mba_files.py delete <id> --yes` |
+| Agent Skill list | `python3 scripts/mba_skills.py list` |
+| Agent Skill get | `python3 scripts/mba_skills.py get <id>` |
+| Agent Skill create | `python3 scripts/mba_skills.py create --body-file /tmp/skill.json` |
+| Agent Skill update | `python3 scripts/mba_skills.py update <id> --body-file /tmp/skill.json` |
+| Agent Skill delete | `python3 scripts/mba_skills.py delete <id> --yes` |
+| UI Skill list | `python3 scripts/mba_ui_skills.py list` |
+| UI Skill get | `python3 scripts/mba_ui_skills.py get <id>` |
+| UI Skill create | `python3 scripts/mba_ui_skills.py create --body-file /tmp/uiskill.json` |
+| UI Skill update | `python3 scripts/mba_ui_skills.py update <id> --body-file /tmp/uiskill.json` |
+| UI Skill delete | `python3 scripts/mba_ui_skills.py delete <id> --yes` |
 
+## Procedure
+### A. Knowledge: FAQs
+1. **List existing FAQs**
+   - Run: `terminal(command="python3 scripts/mba_faq.py list", timeout=30)`
+   - Completion: Returns array of FAQ objects with `id`, `question`, `answer`, `status`.
 
-### 5. UI Skills (Interactive Components)
-```bash
-python3 scripts/mba_ui_skills.py list
-python3 scripts/mba_ui_skills.py get <id>
-python3 scripts/mba_ui_skills.py create --body-file /tmp/uiskill.json
-python3 scripts/mba_ui_skills.py update <id> --body-file /tmp/uiskill.json
-python3 scripts/mba_ui_skills.py delete <id> --yes
-```
-*Ref payload: `templates/uiskill.request.example.json`*
+2. **Create FAQ**
+   - Copy `templates/faq.request.example.json` → `/tmp/faq.json`
+   - Modify `question`, `answer` (max 1024 chars each), set `status: "ACTIVE"`
+   - Run: `terminal(command="python3 scripts/mba_faq.py create --body-file /tmp/faq.json", timeout=30)`
+   - Completion: Response contains new `id`; re-run `list` to confirm.
 
-## Audit Workflow: Company Information Validity
-When auditing whether an MBA has valid company information, run read-only checks first and report evidence, not assumptions:
-1. `python3 scripts/mba_knowledge.py faq list` — inspect all FAQ questions/answers for stale dates, unsupported claims, contact data, service descriptions, and risky superlatives.
-2. `python3 scripts/mba_knowledge.py web list` — verify web sources have usable crawl output. Treat `pages_crawled: 0` or long-running `crawl_status: in_progress` as not yet useful grounding.
-3. `python3 scripts/mba_knowledge.py skills list` — inspect behavior instructions that may cause invented customer/company facts (for example: "look up contact info" without fallback rules).
-4. `python3 scripts/mba_ui_skills.py list` — review the agent's interactive UI components and their trigger instructions. Ensure the agent is permitted to send correct UI components (like a CTA button) instead of hallucinating links.
-5. If runtime tests fail with `ELIGIBILITY_CHECK_FAILED`, pivot to `mba-onboard` checks (`settings get`, `allowlist list`) before judging answer quality.
-6. Categorize findings as: stale/dated facts, unsupported claims needing source docs, missing grounding sources, risky behavior instructions, broken/missing UI components, and blocked runtime validation.
+3. **Update FAQ**
+   - Run `get <id>` → save response → modify `question`/`answer`/`status` → `update --body-file`
+   - Completion: Response echoes updated fields; re-run `get` to confirm.
 
-For dated operational facts (holiday hours, "besok", event dates), recommend deleting or replacing with a source-of-truth answer unless the user provides current operating calendar data.
-For big credibility claims (client counts, partner status, certifications, delivery rates, "only BSP", notable clients), ask for verifiable company sources such as website pages, company profile PDF, certificates, case studies, or sales deck before promoting them as stable customer-facing knowledge.
+4. **Delete FAQ**
+   - Run: `terminal(command="python3 scripts/mba_faq.py delete <id> --yes", timeout=30)`
+   - Completion: Returns empty success; re-run `list` to confirm removal.
 
-## Important Rules
-- **Destructive Actions**: Always require the `--yes` flag (e.g., `delete`).
-- **No Direct API**: Never use `curl`. Always use `python3 scripts/mba_knowledge.py`.
-- **Payload Generation**: Never invent JSON structures. Use the examples in `templates/` (inside this skill directory) as reference. Copy them to `/tmp`, modify, and supply via `--body-file`.
-- **Website Knowledge Recreate Loop**: After `python3 scripts/mba_knowledge.py web create`, always verify with `python3 scripts/mba_knowledge.py web list`. If official public URLs return HTTP 200 but website knowledge remains stuck at `in_progress` with `pages_crawled: 0`, treat FAQ + File Knowledge as the primary grounding. If the user approves, delete the stuck website entries and recreate them, then recheck instead of assuming the URLs are bad.
-- **Skill Mutations**: For `python3 scripts/mba_knowledge.py skills create/update/delete`, inspect existing skills first, draft and save payload locally, ask approval with exact command + impact, then execute and log outcome. See `references/agent-skill-mutation-workflow.md`.
-- **UI Skill Setup**: Verify that flow-based UI skills (`component_type: flow`) actually reference an existing, published Flow ID before enabling them.
-- **Connector-backed Behavior Skills**: When an agent skill describes behavior around connector tools, name the connector tool, define deterministic routing rules, include exception handling, and prohibit invented data not returned by the connector. For promo/voucher flows, explicitly forbid listing active promos, voucher codes, or offer names unless they were returned by the connector response.
-- **Runtime Test Safety**: When opening `ai_audience` beyond `ALLOWLISTED_ONLY` for validation, save a rollback payload first, run the required tests immediately, and restore the original audience setting as soon as testing is done.
-### References
-- `references/faq-schema.md` - Schema limits and rules for FAQs.
-- `references/business-info-schema.md` - Schema and constraints for Business Info.
-- `references/file-knowledge-supported-types.md` - Supported extensions and size limits.
-- `references/website-knowledge-crawl-status.md` - Crawl status enums and stuck behavior.
-- `references/agent-skill-authoring-rules.md` - Schema and logical constraints for skill creation.
-- `references/ui-skills-workflow.md` - Theory, benefits, and step-by-step workflow for configuring Interactive UI components.
+### B. Knowledge: Websites
+1. **List websites**
+   - Run: `terminal(command="python3 scripts/mba_websites.py list", timeout=30)`
+   - Completion: Returns array with `id`, `url`, `crawl_status`, `pages_crawled`, `last_crawled_at`.
+
+2. **Create website source**
+   - Copy `templates/websites.request.example.json` → `/tmp/web.json`
+   - Set `url` (public, HTTPS), optional `name`, `crawl_frequency`
+   - Run: `terminal(command="python3 scripts/mba_websites.py create --body-file /tmp/web.json", timeout=30)`
+   - Completion: Response contains `id` and `crawl_status: "in_progress"`.
+
+3. **Verify crawl readiness**
+   - Run `list` repeatedly until `crawl_status: "completed"` AND `pages_crawled > 0`
+   - If stuck at `in_progress` with `pages_crawled: 0` for >10 min: treat as stuck; see Pitfalls.
+
+4. **Delete website**
+   - Run: `terminal(command="python3 scripts/mba_websites.py delete <id> --yes", timeout=30)`
+   - Completion: Re-run `list` to confirm removal.
+
+### C. Knowledge: Files
+1. **Upload file**
+   - Run: `terminal(command="python3 scripts/mba_files.py upload /path/to/file.pdf --name \"Policy 2026\"", timeout=60)`
+   - Completion: Returns `id`, `name`, `status: "PROCESSED"` (or `PROCESSING` → poll `get`).
+
+2. **List/delete files** — analogous to FAQs.
+
+### D. Agent Skills (Behavior Instructions)
+1. **List skills**
+   - Run: `terminal(command="python3 scripts/mba_skills.py list", timeout=30)`
+   - Completion: Returns array with `id`, `name`, `instruction`, `status`.
+
+2. **Create skill**
+   - Copy `templates/skill.request.example.json` → `/tmp/skill.json`
+   - Set `name`, `instruction` (max 8192 chars), `status: "ACTIVE"`
+   - Run: `terminal(command="python3 scripts/mba_skills.py create --body-file /tmp/skill.json", timeout=30)`
+   - Completion: Response contains `id`; re-run `list` to confirm.
+
+3. **Mutate skill (update/delete)**
+   - **Always inspect existing skills first** (`list` + `get`)
+   - Draft payload locally, ask approval with exact command + impact, then execute
+   - See `references/agent-skill-mutation-workflow.md` for full protocol.
+
+### E. UI Skills (Interactive Components)
+1. **List UI skills**
+   - Run: `terminal(command="python3 scripts/mba_ui_skills.py list", timeout=30)`
+   - Completion: Returns array with `id`, `component_type`, `trigger_instruction`, `status`.
+
+2. **Create UI skill**
+   - Copy `templates/uiskill.request.example.json` → `/tmp/uiskill.json`
+   - Set `component_type` (`button`, `list`, `flow`), `trigger_instruction`, `payload`
+   - For `flow` type: verify referenced Flow ID exists and is published before enabling
+   - Run: `terminal(command="python3 scripts/mba_ui_skills.py create --body-file /tmp/uiskill.json", timeout=30)`
+   - Completion: Response contains `id`; re-run `list` to confirm.
+
+### F. Audit Workflow: Company Information Validity
+1. Run `python3 scripts/mba_knowledge.py faq list` — inspect for stale dates, unsupported claims, risky superlatives.
+2. Run `python3 scripts/mba_knowledge.py web list` — verify `pages_crawled > 0` and `crawl_status: "completed"`.
+3. Run `python3 scripts/mba_knowledge.py skills list` — check for behavior instructions that cause invented facts (e.g., "look up contact info" without fallback).
+4. Run `python3 scripts/mba_ui_skills.py list` — ensure agent can send correct UI components instead of hallucinating links.
+5. If runtime tests fail with `ELIGIBILITY_CHECK_FAILED`, pivot to `mba-onboard` checks first.
+6. Categorize findings: stale facts, unsupported claims, missing sources, risky instructions, broken UI, blocked runtime.
+7. For dated operational facts (holiday hours, "besok", event dates): recommend delete/replace unless current calendar provided.
+8. For credibility claims (client counts, certifications, "only BSP"): require verifiable sources (website, PDF, certificates) before promoting.
+
+## Pitfalls
+- **Website crawl stuck at `in_progress` / `pages_crawled: 0`** — public URLs returning 200 can still fail to crawl. Treat FAQ + File Knowledge as primary grounding; delete stuck entries and recreate if user approves.
+- **Skill mutations without inspection** — updating/deleting skills blindly can remove critical behavior constraints. Follow `agent-skill-mutation-workflow.md`.
+- **Flow-type UI skills referencing unpublished Flow IDs** — agent will fail to render; verify Flow is published in Meta Business Manager first.
+- **Connector-backed behavior skills** — must name the connector tool, define deterministic routing, include exception handling, prohibit invented data not from connector response. For promo/voucher flows: explicitly forbid listing promos/vouchers unless returned by connector.
+- **Runtime test safety** — when opening `ai_audience` beyond `ALLOWLISTED_ONLY` for validation, save rollback payload first, run tests immediately, restore audience setting.
+- **Destructive ops require `--yes`** — all `delete` commands refuse without it.
+- **Payload generation** — never invent JSON; always use templates in `templates/`.
+
+## Verification
+- FAQ list/get/create/update/delete cycle completes with expected IDs and fields
+- Website list shows `crawl_status: "completed"` and `pages_crawled > 0` for active sources
+- File upload returns `status: "PROCESSED"` (poll `get` if `PROCESSING`)
+- Agent Skill list returns expected instructions; create/update/delete persists
+- UI Skill list returns expected components; flow-type references valid published Flow ID
+- Audit workflow produces categorized findings with evidence, not assumptions
+- No 401/403/404 on any operation
