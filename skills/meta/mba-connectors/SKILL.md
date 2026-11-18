@@ -39,14 +39,15 @@ Don't use for:
 - **Config template:** `templates/config.example.json` — copy to `workspace/mba/config.json` and fill in your values if not using `mba-setup`
 - Payload templates in `templates/` — copy to `/tmp`, modify, pass via `--body-file`
 
+### Missing Configuration
+If any script reports "Missing required env" or "ConfigError: Missing required env", **run the `mba-setup` skill immediately**:
+```
+skill_view(name="mba-setup")
+```
+Then follow the skill's guided setup to create `workspace/mba/config.json` with your `access_token` and `entity_id`. All MBA scripts auto-detect this config on subsequent runs.
+
 ## How to Run
 All operations go through the `terminal` tool invoking the skill's Python scripts. The updated scripts now read config from `workspace/mba/config.json` first, falling back to `.env` in cwd with a deprecation warning.
-
-### Setup (one-time)
-```
-terminal(command="python3 scripts/mba_setup.py", timeout=30)
-```
-This creates `workspace/mba/config.json` with your `access_token` and `entity_id`.
 
 ### Example invocations
 ```
