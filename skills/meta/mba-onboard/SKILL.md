@@ -35,6 +35,7 @@ Don't use for:
   - Permission: `whatsapp_business_messaging`
   - Capability: `bizai_wa_enterprise_api_3p_access`
 - Python 3.10+ with stdlib only (scripts use `urllib`, `json`, `pathlib`)
+- **Config template:** `templates/config.example.json` — copy to `workspace/mba/config.json` and fill in your values if not using `mba-setup`
 
 ## How to Run
 All operations go through the `terminal` tool invoking the skill's Python scripts. The updated scripts now read config from `workspace/mba/config.json` first, falling back to `.env` in cwd with a deprecation warning.

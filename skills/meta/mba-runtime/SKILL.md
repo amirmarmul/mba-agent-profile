@@ -35,6 +35,7 @@ Don't use for:
   - Permission: `whatsapp_business_messaging`
   - Capability: `bizai_wa_enterprise_api_3p_access`
 - Python 3.10+ with stdlib only (scripts use `urllib`, `json`, `pathlib`)
+- **Config template:** `templates/config.example.json` — copy to `workspace/mba/config.json` and fill in your values if not using `mba-setup`
 - For test/eval: agent must be eligible (`mba-onboard` eligibility check passes) and tester must be allowlisted if `ai_audience: "ALLOWLISTED_ONLY"`
 
 ## How to Run
