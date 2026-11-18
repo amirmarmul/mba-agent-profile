@@ -69,7 +69,7 @@ class MetaConfig:
         access_token = os.getenv("META_ACCESS_TOKEN", "").strip()
         entity_id = os.getenv("META_ENTITY_ID", "").strip()
         api_version = os.getenv("META_API_VERSION", DEFAULT_API_VERSION).strip() or DEFAULT_API_VERSION
-        base_url = os.getenv("META_BASE_URL", DEFAULT_BASE_URL).strip() or DEFAULT_BASE_VERSION
+        base_url = os.getenv("META_BASE_URL", DEFAULT_BASE_URL).strip() or DEFAULT_BASE_URL
 
         if access_token and entity_id:
             print("WARNING: .env config is deprecated. Run 'mba-setup' to migrate to workspace/mba/config.json", file=sys.stderr)
