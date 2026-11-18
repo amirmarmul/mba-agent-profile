@@ -5,13 +5,10 @@ hermes_requires: ">=0.23.0"
 license: "MIT"
 author: "Amir Marmul"
 
-env_requires:
-  - name: META_ACCESS_TOKEN
-    description: "Meta Graph API access token used by mba CLI and direct Graph API workflows"
-    required: true
-  - name: META_ENTITY_ID
-    description: "Default Meta entity id for managing and Graph API workflows."
-    required: true
+# Meta credentials are intentionally NOT declared here: .env is deprecated for
+# META_ACCESS_TOKEN / META_ENTITY_ID. They are configured by the mba-setup skill
+# into <profile>/workspace/mba/config.json. Provider keys (e.g. HERMES_CUSTOM_LLM_API_KEY)
+# remain normal .env secrets and are not distribution requirements.
 
 distribution_owned:
   - SOUL.md
