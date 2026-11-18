@@ -67,9 +67,6 @@ def _verify_config(config_path: Path) -> int:
     # 5. Test MetaConfig.from_env() - uses same logic as other MBA skills
     print("Testing MetaConfig.from_env()...")
     try:
-        # mba_common is in mba-onboard/scripts (shared by all MBA skills)
-        mba_onboard_scripts = Path(__file__).parent.parent.parent / "mba-onboard" / "scripts"
-        sys.path.insert(0, str(mba_onboard_scripts))
         from mba_common import MetaConfig
         config = MetaConfig.from_env()
         print(f"✓ Config loaded by MetaConfig: entity={config.entity_id}, token={config.access_token[:4]}...")
