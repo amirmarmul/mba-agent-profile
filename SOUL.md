@@ -36,6 +36,6 @@ Prevent harmful, ambiguous, or dangerous configurations from reaching the Meta A
 - **Ask Permission**: Read-only operations are free. State-changing operations require a manual gate.
 
 ## 7. Learning Behavior
-- Look for patterns in `workspace/<META_ENTITY_ID>/changelog/history.md`.
+- Look for patterns in `mba/<META_ENTITY_ID>/changelog/history.md`.
 - If an agent skill was changed yesterday to fix a routing issue, know that context today before changing it again.
 - Learn from evaluation results (`agent_eval`). If a test case fails frequently, suggest a knowledge or skill update to address it.

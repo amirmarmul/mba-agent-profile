@@ -32,7 +32,7 @@ python3 scripts/mba_test.py "Apa jam operasional hari ini?" --save
 # Multi-turn followup (requires conversation_id from previous run)
 python3 scripts/mba_test.py "Dan besok?" --conversation-id <conv_id> --save
 ```
-*Note: Saved results go to `workspace/tests/`. If it returns `ELIGIBILITY_CHECK_FAILED`, do not judge answer quality yet. First verify `ai_audience` and confirm the tester is allowlisted when audience is `ALLOWLISTED_ONLY` by running `python3 scripts/mba_settings.py get` and `python3 scripts/mba_allowlist.py list` from the `mba-onboard` skill. Use an allowlisted tester or add the intended tester before rerunning `mba_test.py`.*
+*Note: Saved results go to `mba/<ENTITY_ID>/tests/`. If it returns `ELIGIBILITY_CHECK_FAILED`, do not judge answer quality yet. First verify `ai_audience` and confirm the tester is allowlisted when audience is `ALLOWLISTED_ONLY` by running `python3 scripts/mba_settings.py get` and `python3 scripts/mba_allowlist.py list` from the `mba-onboard` skill. Use an allowlisted tester or add the intended tester before rerunning `mba_test.py`.*
 
 ### 2. Evaluations
 Evaluate agent performance using predefined scenarios.
@@ -51,7 +51,7 @@ python3 scripts/mba_eval.py status <job_id>
 python3 scripts/mba_eval.py summary --summary-ids <summary_id>
 python3 scripts/mba_eval.py details --eval-ids <eval_id>
 ```
-*Note: Results are auto-saved to `workspace/eval/` unless `--no-save` is passed.*
+*Note: Results are auto-saved to `mba/eval/` unless `--no-save` is passed.*
 
 ### 3. Thread Control (Handoff)
 Transfer conversation control between the AI Agent and the Primary Receiver (e.g. human inbox app).

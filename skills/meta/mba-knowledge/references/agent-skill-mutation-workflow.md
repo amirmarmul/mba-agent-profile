@@ -10,13 +10,13 @@ Use when creating or updating Meta Business Agent behavior skills through `pytho
    - `description`: when this behavior applies.
    - `skill`: concrete rules the WhatsApp agent must follow.
 3. Save draft payload before mutation:
-   - Preferred path: `workspace/<META_ENTITY_ID>/changelog/payloads/YYYY-MM-DD_<topic>-skill.json`.
-   - If entity ID cannot be read, use `workspace/unknown/changelog/payloads/` rather than blocking payload prep.
+   - Preferred path: `mba/<META_ENTITY_ID>/changelog/payloads/YYYY-MM-DD_<topic>-skill.json`.
+   - If entity ID cannot be read, use `mba/unknown/changelog/payloads/` rather than blocking payload prep.
 4. Ask user approval before `python3 scripts/mba_skills.py create`, `update`, or `delete`.
    - Provide exact script path, e.g. `python3 scripts/mba_skills.py create --body-file /path/to/payload`
    - Wait for "yes", "proceed", or "approve".
 5. After approval, execute mutation.
-6. Log executed mutation to `workspace/<ENTITY_ID-or-unknown>/changelog/history.md` with:
+6. Log executed mutation to `mba/<ENTITY_ID-or-unknown>/changelog/history.md` with:
    - Date/Time
    - Action
    - Payload path

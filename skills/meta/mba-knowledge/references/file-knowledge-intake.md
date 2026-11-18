@@ -10,7 +10,7 @@
 3. If API returns `Unsupported File Type` for `.md` or `.txt`, convert source text to PDF.
 4. Upload the generated PDF via `python3 scripts/mba_files.py upload /path/to/file.pdf --name "...pdf"`.
 5. Verify with `python3 scripts/mba_files.py list`.
-6. Log conversion reason and uploaded file names in `workspace/<ENTITY_ID>/changelog/history.md`.
+6. Log conversion reason and uploaded file names in `mba/<ENTITY_ID>/changelog/history.md`.
 
 ## Pitfalls
 - Do not assume markdown exports are valid File Knowledge uploads.

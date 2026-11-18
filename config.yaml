@@ -22,3 +22,9 @@ telemetry:
     enabled: false
     send: false
     offer_version: 2
+onboarding:
+  seen:
+    tool_progress_prompt: true
+    busy_input_prompt: true
+terminal:
+  cwd: ${HERMES_HOME}/workspace

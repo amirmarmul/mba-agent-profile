@@ -160,7 +160,7 @@ def write_run_output(kind: str, payload: Any, prefix: str = "run") -> Path:
     config = MetaConfig.from_env()
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     safe_prefix = "".join(ch if ch.isalnum() or ch in "-_" else "-" for ch in prefix).strip("-") or "run"
-    out_dir = Path("workspace") / config.entity_id / kind
+    out_dir = Path("mba") / config.entity_id / kind
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / f"{timestamp}-{safe_prefix}.json"
     out_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
@@ -170,7 +170,7 @@ def write_run_output(kind: str, payload: Any, prefix: str = "run") -> Path:
 def add_save_arg(parser: argparse.ArgumentParser, default: bool = False) -> None:
     action = "store_true" if not default else "store_false"
     flag = "--save" if not default else "--no-save"
-    parser.add_argument(flag, action=action, dest="save", default=default, help="Save response JSON under workspace/")
+    parser.add_argument(flag, action=action, dest="save", default=default, help="Save response JSON under mba/")
 
 
 def add_yes_arg(parser: argparse.ArgumentParser) -> None:

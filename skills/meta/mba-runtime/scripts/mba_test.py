@@ -6,7 +6,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Test agent with a message")
     parser.add_argument("user_msg", help="Message text")
     parser.add_argument("--conversation-id", help="Optional conversation ID for multi-turn")
-    parser.add_argument("--save", action="store_true", help="Save response to workspace/<ENTITY_ID>/tests/")
+    parser.add_argument("--save", action="store_true", help="Save response to mba/<ENTITY_ID>/tests/")
 
     args = parser.parse_args()
     config = MetaConfig.from_env()

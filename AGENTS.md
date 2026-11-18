@@ -45,7 +45,7 @@ If you are newly spawned in this repository:
     - `SKILL.md`
     - `scripts/*.py`
     - `templates/*.json`
-- `workspace/<META_ENTITY_ID>/`
+- `mba/<META_ENTITY_ID>/`
   - multi-tenant outputs and audit trail
   - includes tests, eval outputs, and changelog artifacts
 - `docs/`
@@ -65,7 +65,7 @@ Map every user request to the correct skill domain and local script.
 Example: “Update FAQ for the holiday promo.”
 1. Identify the active `META_ENTITY_ID`.
 2. Draft the JSON payload locally under:
-   `workspace/<META_ENTITY_ID>/changelog/payloads/YYYY-MM-DD_<action>.json`
+   `mba/<META_ENTITY_ID>/changelog/payloads/YYYY-MM-DD_<action>.json`
 3. Validate the payload quality before execution.
 4. Explain what will happen and what the impact is.
 5. Wait for explicit approval.
@@ -74,7 +74,7 @@ Example: “Update FAQ for the holiday promo.”
    python3 scripts/mba_faq.py update <id> --body-file <payload_path>
    ```
 7. Append an audit entry to:
-   `workspace/<META_ENTITY_ID>/changelog/history.md`
+   `mba/<META_ENTITY_ID>/changelog/history.md`
 
 Use similar workflow for:
 - reviewing or updating agent skills
@@ -87,7 +87,7 @@ Use similar workflow for:
 Proceed automatically for:
 - read-only checks (`list`, `get`, `logs`, `status`)
 - creating local payload drafts
-- saving payloads under `workspace/<META_ENTITY_ID>/changelog/payloads/`
+- saving payloads under `mba/<META_ENTITY_ID>/changelog/payloads/`
 - writing markdown audit logs
 
 Always ask before, and explain impact, for:
@@ -111,13 +111,13 @@ When asking approval, state:
 This workspace is multi-tenant. Never mix customer/entity data.
 
 All generated payloads, test outputs, eval outputs, and audit logs must be stored under:
-`workspace/<META_ENTITY_ID>/...`
+`mba/<META_ENTITY_ID>/...`
 
 Required audit trail location:
-`workspace/<META_ENTITY_ID>/changelog/history.md`
+`mba/<META_ENTITY_ID>/changelog/history.md`
 
 Required payload archive location:
-`workspace/<META_ENTITY_ID>/changelog/payloads/`
+`mba/<META_ENTITY_ID>/changelog/payloads/`
 
 Each audit entry should include:
 - Date/Time
@@ -146,9 +146,9 @@ Learn from previous changes instead of treating each run as stateless.
 - Payload templates:
   - `skills/<skill>/templates/`
 - Tenant audit history:
-  - `workspace/<META_ENTITY_ID>/changelog/history.md`
+  - `mba/<META_ENTITY_ID>/changelog/history.md`
 - Tenant payload archive:
-  - `workspace/<META_ENTITY_ID>/changelog/payloads/`
+  - `mba/<META_ENTITY_ID>/changelog/payloads/`
 
 Do not invent JSON schemas when templates already exist inside a skill.
 Prefer reading the closest template and adapting it to the requested operation.

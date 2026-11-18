@@ -16,7 +16,7 @@ MBA File Knowledge API may reject Markdown and plain-text clipping uploads as un
 2. Convert the source document into PDF.
 3. Upload the PDF with `python3 scripts/mba_files.py upload /path/to/file.pdf --name "..."`.
 4. Verify with `python3 scripts/mba_files.py list`.
-5. Log uploaded filenames and returned file IDs in `workspace/<ENTITY_ID>/changelog/history.md`.
+5. Log uploaded filenames and returned file IDs in `mba/<ENTITY_ID>/changelog/history.md`.
 
 ## Why this matters
 

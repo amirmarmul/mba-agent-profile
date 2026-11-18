@@ -12,7 +12,7 @@ def main() -> int:
     er = sub.add_parser("run")
     er.add_argument("--eval-case-ids", required=True, help="Comma-separated pfbid list")
     er.add_argument("--body-file", required=True, help="JSON body file")
-    er.add_argument("--no-save", action="store_true", help="Disable saving to workspace/")
+    er.add_argument("--no-save", action="store_true", help="Disable saving to mba/")
     
     es = sub.add_parser("status")
     es.add_argument("job_id")
