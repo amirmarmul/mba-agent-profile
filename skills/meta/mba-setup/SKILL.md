@@ -46,11 +46,19 @@ This creates `workspace/mba/config.json` with your `access_token` and `entity_id
 ### If config already exists
 Re-run this skill and choose `y` to overwrite, or update individual values via the workspace config file.
 
+### Verify existing config
+```
+terminal(command="python3 scripts/mba_setup.py --verify", timeout=15)
+```
+Validates JSON structure, required fields, entity_id format, and MetaConfig.load().
+
 ## Quick Reference
 | Action | Command |
 |--------|---------|
 | Run setup | `terminal(command="python3 scripts/mba_setup.py", timeout=30)` |
-| Verify config | `terminal(command="python3 -c \"import json; from pathlib import Path; p=Path('workspace/mba/config.json'); d=json.loads(p.read_text()); print('token:', d.get('access_token','')[:4]+'...', 'entity:', d.get('entity_id',''))\"", timeout=15)` |
+| Verify config | `terminal(command="python3 scripts/mba_setup.py --verify", timeout=15)` |
+| Non-interactive setup | `terminal(command="python3 scripts/mba_setup.py --force --access-token TOKEN --entity-id 123456789", timeout=30)` |
+| Print config path | `terminal(command="python3 scripts/mba_setup.py --print-config-path", timeout=5)` |
 
 ## Procedure
 ### 1. Run setup
@@ -59,9 +67,9 @@ Re-run this skill and choose `y` to overwrite, or update individual values via t
 - Verify: Config file exists at `workspace/mba/config.json` with required keys
 
 ### 2. Verify config
-- Run: `terminal(command="python3 -c \"import json; from pathlib import Path; p=Path('workspace/mba/config.json'); d=json.loads(p.read_text()); print('token:', d.get('access_token','')[:4]+'...', 'entity:', d.get('entity_id',''))\"", timeout=15)`
-- Completion: Shows first 4 chars of token and entity_id; no deprecation warning
-- Verify: All MBA scripts now read from workspace config
+- Run: `terminal(command="python3 scripts/mba_setup.py --verify", timeout=15)`
+- Completion: Exit code 0; output shows `✓ Config verification passed` with entity_id, api_version, base_url, token prefix
+- Verify: All MBA scripts now read from workspace config (MetaConfig.from_env() succeeds)
 
 ## Pitfalls
 - **Entity ID vs WABA ID:** `META_ENTITY_ID` must be the numeric Phone Number ID, not the WABA ID. Using WABA ID returns 404 on all endpoints.
@@ -72,6 +80,6 @@ Re-run this skill and choose `y` to overwrite, or update individual values via t
 
 ## Verification
 - `workspace/mba/config.json` exists with `access_token`, `entity_id`, `api_version`, `base_url` keys
-- Config file passes JSON validation and contains non-empty required fields
+- `python3 scripts/mba_setup.py --verify` exits 0 and shows `✓ Config verification passed`
 - All other MBA skills (`mba-onboard`, `mba-knowledge`, `mba-connectors`, `mba-runtime`) auto-detect config and no longer show deprecation warnings
 - No 401/403/404 on config-requiring API calls after setup

@@ -25,6 +25,69 @@ def _prompt_if_tty(prompt: str, default: str = "") -> str:
     return default
 
 
+def _verify_config(config_path: Path) -> int:
+    """Verify config file: JSON validity, required fields, entity_id format.
+    Returns 0 on success, non-zero on failure.
+    """
+    print(f"Verifying config: {config_path}")
+    print()
+
+    if not config_path.exists():
+        print("✗ Config file does not exist", file=sys.stderr)
+        return 1
+
+    # 1. JSON validity
+    try:
+        data = json.loads(config_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        print(f"✗ Invalid JSON: {e}", file=sys.stderr)
+        return 1
+    except OSError as e:
+        print(f"✗ Cannot read config: {e}", file=sys.stderr)
+        return 1
+
+    # 2. Required fields
+    required = ["access_token", "entity_id", "api_version", "base_url"]
+    missing = [k for k in required if not data.get(k)]
+    if missing:
+        print(f"✗ Missing required fields: {', '.join(missing)}", file=sys.stderr)
+        return 1
+
+    # 3. Non-empty required fields
+    empty = [k for k in ["access_token", "entity_id"] if not data.get(k, "").strip()]
+    if empty:
+        print(f"✗ Empty required fields: {', '.join(empty)}", file=sys.stderr)
+        return 1
+
+    # 4. entity_id numeric
+    entity_id = data.get("entity_id", "").strip()
+    if not entity_id.isdigit():
+        print("⚠ WARNING: entity_id should be numeric Phone Number ID (not WABA ID)", file=sys.stderr)
+
+    # 5. Test MetaConfig.from_env() - uses same logic as other MBA skills
+    print("Testing MetaConfig.from_env()...")
+    try:
+        # mba_common is in mba-onboard/scripts (shared by all MBA skills)
+        mba_onboard_scripts = Path(__file__).parent.parent.parent / "mba-onboard" / "scripts"
+        sys.path.insert(0, str(mba_onboard_scripts))
+        from mba_common import MetaConfig
+        config = MetaConfig.from_env()
+        print(f"✓ Config loaded by MetaConfig: entity={config.entity_id}, token={config.access_token[:4]}...")
+    except ImportError:
+        print("⚠ Could not import MetaConfig (mba_common not found)", file=sys.stderr)
+    except Exception as e:
+        print(f"✗ MetaConfig.from_env() failed: {e}", file=sys.stderr)
+        return 1
+
+    print()
+    print("✓ Config verification passed")
+    print(f"  entity_id: {entity_id}")
+    print(f"  api_version: {data.get('api_version')}")
+    print(f"  base_url: {data.get('base_url')}")
+    print(f"  access_token: {data.get('access_token', '')[:4]}...")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Initialize Meta Business Agent workspace configuration",
@@ -69,6 +132,11 @@ Environment variables:
         action="store_true",
         help="Print config path and exit",
     )
+    parser.add_argument(
+        "--verify", "-V",
+        action="store_true",
+        help="Verify existing config file (validates JSON, required fields, entity_id format)",
+    )
 
     args = parser.parse_args()
 
@@ -77,6 +145,9 @@ Environment variables:
     if args.print_config_path:
         print(config_path)
         return 0
+
+    if args.verify:
+        return _verify_config(config_path)
 
     print("=== MBA Setup ===")
     print(f"Config will be written to: {config_path}")
