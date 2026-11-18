@@ -1,6 +1,0 @@
-{
-  "access_token": "YOUR_META_ACCESS_TOKEN_HERE",
-  "entity_id": "YOUR_WHATSAPP_BUSINESS_PHONE_NUMBER_ID_HERE",
-  "api_version": "2.0.0",
-  "base_url": "https://api.facebook.com"
-}
