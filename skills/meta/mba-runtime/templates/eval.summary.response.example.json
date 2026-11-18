@@ -1,0 +1,15 @@
+{
+  "insights": [
+    {
+      "id": "summary-id",
+      "avg_conversation_score": 1.0,
+      "avg_turn_score": 1.0,
+      "summary": "Overall agent performance is strong with minor gaps in product knowledge",
+      "highlights": "[]",
+      "top_failure_categories": "[]",
+      "eval_ids_by_score": "{}",
+      "creation_time": 1714500000,
+      "update_time": 1714500000
+    }
+  ]
+}

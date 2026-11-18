@@ -1,0 +1,11 @@
+{
+  "eval_cases": [
+    {
+      "id": "pfbid-example",
+      "scenario": "Customer asks about order status",
+      "categories": ["order_status"],
+      "max_turns": 10,
+      "success_criteria": ["Agent asks for order ID", "Agent explains next step clearly"]
+    }
+  ]
+}

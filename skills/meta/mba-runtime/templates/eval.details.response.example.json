@@ -1,0 +1,15 @@
+{
+  "evaluations": [
+    {
+      "id": "eval-id",
+      "score": 85,
+      "per_turn_labels": "[]",
+      "reasons": "[]",
+      "custom_success_criteria": "[]",
+      "eval_case_id": "pfbid-example",
+      "transcript": "{}",
+      "creation_time": 1714500000,
+      "update_time": 1714500000
+    }
+  ]
+}

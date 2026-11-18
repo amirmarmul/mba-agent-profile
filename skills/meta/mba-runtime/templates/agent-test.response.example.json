@@ -1,0 +1,10 @@
+{
+  "message_id": "string",
+  "agent_response": "string",
+  "conversation_id": "string",
+  "timestamp": 0,
+  "handoff_reason": "string",
+  "no_response_reason": "ELIGIBILITY_CHECK_FAILED",
+  "quick_replies": ["string"],
+  "product_variant_ids": ["string"]
+}

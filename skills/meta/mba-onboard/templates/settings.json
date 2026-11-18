@@ -1,0 +1,8 @@
+{
+  "rollout": {
+    "enabled": false
+  },
+  "handoff": {
+    "enabled": true
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "id": "string",
+  "title": "greeting-skill",
+  "description": "Apply when customer first messages agent.",
+  "skill": "Instruction body.",
+  "channel": "whatsapp",
+  "created_at": 0,
+  "metadata": {
+    "key": "value"
+  }
+}

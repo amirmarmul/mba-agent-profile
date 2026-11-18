@@ -1,0 +1,13 @@
+{
+  "api_key_config": {
+    "headers": [
+      {
+        "field_name": "Authorization",
+        "prefix": "Bearer ",
+        "value": "super-secret-token"
+      }
+    ],
+    "query_params": [],
+    "body_params": []
+  }
+}

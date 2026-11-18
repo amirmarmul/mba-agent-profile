@@ -1,0 +1,9 @@
+{
+  "id": "string",
+  "question": "string",
+  "answer": "string",
+  "created_at": 0,
+  "metadata": {
+    "key": "value"
+  }
+}

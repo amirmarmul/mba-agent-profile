@@ -1,0 +1,10 @@
+{
+  "id": "string",
+  "name": "get_order_status",
+  "description": "Ambil status order berdasarkan order ID",
+  "request_definition": {
+    "method": "GET",
+    "path": "/orders/{order_id}"
+  },
+  "user_auth_required": false
+}

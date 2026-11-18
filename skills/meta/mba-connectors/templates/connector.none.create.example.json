@@ -1,0 +1,6 @@
+{
+  "name": "hermes_test_none_connector",
+  "description": "Temporary Hermes live mutation test connector with auth_type NONE.",
+  "base_url": "https://example.com",
+  "auth_type": "NONE"
+}

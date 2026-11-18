@@ -1,0 +1,5 @@
+{
+  "name": "sample-connector",
+  "description": "Contoh connector eksternal",
+  "base_url": "https://api.example.com"
+}

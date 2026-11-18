@@ -1,0 +1,24 @@
+model:
+  default: fast
+  provider: llm
+  base_url: https://llm.matahari.my.id/v1
+  api_mode: chat_completions
+  key_env: HERMES_CUSTOM_LLM_API_KEY
+providers:
+  llm:
+    name: LLM
+    base_url: https://llm.matahari.my.id/v1
+    model: lite
+    discover_models: false
+    models:
+      lite: {}
+      fast: {}
+      smart: {}
+    key_env: HERMES_CUSTOM_LLM_API_KEY
+    context_length: 1048576
+_config_version: 50
+telemetry:
+  shared_metrics:
+    enabled: false
+    send: false
+    offer_version: 2

@@ -1,0 +1,6 @@
+{
+  "title": "Interactive Order Link",
+  "component_type": "cta_url",
+  "status": "enabled",
+  "instruction": "If a user asks for a link to order, please send them a button with body text \"Click the link below to order\", button label text \"Order Now\", and URL https://example.com/order"
+}

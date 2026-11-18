@@ -1,0 +1,35 @@
+{
+  "name": "check_order_status",
+  "description": "Use this tool when customer asks status of existing order.",
+  "request_definition": {
+    "method": "GET",
+    "path": "/orders/{order_id}",
+    "path_parameters": {
+      "order_id": {
+        "type": "string",
+        "description": "Order ID from customer",
+        "required": true
+      }
+    },
+    "query_parameters": {
+      "include_tracking": {
+        "type": "boolean",
+        "description": "Whether include tracking details",
+        "required": false,
+        "binding": {
+          "kind": "default",
+          "value": "true"
+        }
+      }
+    },
+    "headers": {
+      "X-Correlation-ID": {
+        "type": "string",
+        "description": "Trace identifier",
+        "required": false
+      }
+    },
+    "body": null
+  },
+  "user_auth_required": false
+}

@@ -1,0 +1,16 @@
+name: meta-mba-agent
+version: 1.0.0
+description: "A Hermes Agent skill pack for Meta business agent operations."
+hermes_requires: ">=0.18.2"
+license: "MIT"
+
+env_requires:
+  - name: OPENAI_API_KEY
+    description: "OpenAI API key (for model access)"
+    required: true
+  - name: META_ACCESS_TOKEN
+    description: "Meta Graph API access token used by mba CLI and direct Graph API workflows"
+    required: true
+  - name: META_ENTITY_ID
+    description: "Default Meta entity id for managing and Graph API workflows."
+    required: true

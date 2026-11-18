@@ -1,0 +1,11 @@
+{
+  "id": "string",
+  "name": "sample-connector",
+  "description": "Connector description",
+  "base_url": "https://api.example.com",
+  "auth_type": "API_KEY",
+  "connection_status": {
+    "status": "ACTIVE",
+    "error_message": ""
+  }
+}

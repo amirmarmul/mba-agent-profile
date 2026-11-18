@@ -1,0 +1,17 @@
+{
+  "agent_id": "string",
+  "channel": "whatsapp",
+  "rollout": {
+    "enabled": true
+  },
+  "handoff": {
+    "enabled": true,
+    "message": "string"
+  },
+  "followup": {
+    "enabled": true,
+    "followup_interval_in_seconds": 300,
+    "message": "string"
+  },
+  "ai_audience": "ALLOWLISTED_ONLY"
+}

@@ -1,0 +1,5 @@
+{
+  "type": "handoff_event",
+  "description": "User requested to speak with a human agent.",
+  "payload": "{\"reason\": \"complex_query\", \"priority\": \"high\"}"
+}
