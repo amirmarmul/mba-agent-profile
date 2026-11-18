@@ -35,7 +35,7 @@ Don't use for:
   - Permission: `whatsapp_business_messaging`
   - Capability: `bizai_wa_enterprise_api_3p_access`
 - Python 3.10+ with stdlib only (scripts use `urllib`, `json`, `pathlib`)
-- **Config template:** `assets/config.example.json` — reference only; use `mba-setup` to create config
+- **Config template:** `mba-setup`'s `assets/config.example.json` — reference only; use `mba-setup` to create config
 
 ### Missing Configuration
 If any script reports "Missing required env" or "ConfigError: Missing required env", **run the `mba-setup` skill immediately**:

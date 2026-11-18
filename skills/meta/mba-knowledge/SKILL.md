@@ -34,7 +34,7 @@ Don't use for:
   - Permission: `whatsapp_business_messaging`
   - Capability: `bizai_wa_enterprise_api_3p_access`
 - Python 3.10+ with stdlib only (scripts use `urllib`, `json`, `pathlib`, `mimetypes`)
-- **Config template:** `assets/config.example.json` — reference only; use `mba-setup` to create config
+- **Config template:** `mba-setup`'s `assets/config.example.json` — reference only; use `mba-setup` to create config
 - Payload templates in `assets/` — copy to `/tmp`, modify, pass via `--body-file`
 
 ### Missing Configuration

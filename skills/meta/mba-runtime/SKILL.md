@@ -36,7 +36,7 @@ Don't use for:
   - Capability: `bizai_wa_enterprise_api_3p_access`
 - Python 3.10+ with stdlib only (scripts use `urllib`, `json`, `pathlib`)
 - For test/eval: agent must be eligible (`mba-onboard` eligibility check passes) and tester must be allowlisted if `ai_audience: "ALLOWLISTED_ONLY"`
-- **Config template:** `assets/config.example.json` — reference only; use `mba-setup` to create config
+- **Config template:** `mba-setup`'s `assets/config.example.json` — reference only; use `mba-setup` to create config
 
 ### Missing Configuration
 If any script reports "Missing required env" or "ConfigError: Missing required env", **run the `mba-setup` skill immediately**:
