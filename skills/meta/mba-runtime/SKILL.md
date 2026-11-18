@@ -36,7 +36,7 @@ Don't use for:
   - Capability: `bizai_wa_enterprise_api_3p_access`
 - Python 3.10+ with stdlib only (scripts use `urllib`, `json`, `pathlib`)
 - For test/eval: agent must be eligible (`mba-onboard` eligibility check passes) and tester must be allowlisted if `ai_audience: "ALLOWLISTED_ONLY"`
-- **Config template:** `templates/config.example.json` — reference only; use `mba-setup` to create config
+- **Config template:** `assets/config.example.json` — reference only; use `mba-setup` to create config
 
 ### Missing Configuration
 If any script reports "Missing required env" or "ConfigError: Missing required env", **run the `mba-setup` skill immediately**:
@@ -95,7 +95,7 @@ terminal(command="python3 scripts/mba_runtime.py event <consumer_wa_id> --body-f
    - Completion: Returns array of case objects with `id`, `name`, `description`, `turns`.
 
 2. **Run eval job**
-   - Copy `templates/eval.run.request.example.json` → `/tmp/eval.json`
+   - Copy `assets/eval.run.request.example.json` → `/tmp/eval.json`
    - Set `eval_case_ids` (array), optional `config_overrides`
    - Run: `terminal(command="python3 scripts/mba_eval.py run --eval-case-ids pfbid1,pfbid2 --body-file /tmp/eval.json", timeout=60)`
    - Completion: Returns `job_id`; job runs asynchronously.
@@ -120,7 +120,7 @@ terminal(command="python3 scripts/mba_runtime.py event <consumer_wa_id> --body-f
 
 ### D. Agent Events
 1. **Trigger asynchronous event (e.g., handoff request)**
-   - Copy `templates/event.handoff.example.json` → `/tmp/event.json`
+   - Copy `assets/event.handoff.example.json` → `/tmp/event.json`
    - Set `type: "handoff_event"`, `description`, `payload` (JSON string with `reason`, `priority`)
    - Run: `terminal(command="python3 scripts/mba_runtime.py event <consumer_wa_id> --body-file /tmp/event.json", timeout=30)`
    - Completion: Returns `event_id`; event queued for delivery.
@@ -136,7 +136,7 @@ terminal(command="python3 scripts/mba_runtime.py event <consumer_wa_id> --body-f
 - **Handoff requires valid consumer_wa_id** — must be a WhatsApp user who has messaged the business; unknown IDs return 404.
 - **Event payload must be JSON string** — `payload` field in `event.handoff.example.json` is a stringified JSON object, not a nested object.
 - **Destructive ops** — no destructive commands in this skill, but eval jobs consume quota; avoid unnecessary runs.
-- **Payload generation** — never invent JSON; always use templates in `templates/`.
+- **Payload generation** — never invent JSON; always use templates in `assets/`.
 
 ## Verification
 - Test single-turn returns `conversation_id`, `response_text`, no `ELIGIBILITY_CHECK_FAILED`

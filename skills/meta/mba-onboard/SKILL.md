@@ -35,7 +35,7 @@ Don't use for:
   - Permission: `whatsapp_business_messaging`
   - Capability: `bizai_wa_enterprise_api_3p_access`
 - Python 3.10+ with stdlib only (scripts use `urllib`, `json`, `pathlib`)
-- **Config template:** `templates/config.example.json` — reference only; use `mba-setup` to create config
+- **Config template:** `assets/config.example.json` — reference only; use `mba-setup` to create config
 
 ### Missing Configuration
 If any script reports "Missing required env" or "ConfigError: Missing required env", **run the `mba-setup` skill immediately**:
@@ -77,7 +77,7 @@ terminal(command="python3 scripts/mba_allowlist.py remove <entry_id> --yes", tim
 - Completion: Output shows `rollout.enabled`, `handoff.enabled`, `followup.enabled`, `ai_audience` — record these as baseline.
 
 ### 3. Update settings (if needed)
-- Copy `templates/settings.response.example.json` → `/tmp/settings.json`
+- Copy `assets/settings.response.example.json` → `/tmp/settings.json`
 - Modify only the fields you intend to change (e.g., set `rollout.enabled: true`, `ai_audience: "ALLOWLISTED_ONLY"`)
 - Run: `terminal(command="python3 scripts/mba_settings.py update --body-file /tmp/settings.json", timeout=30)`
 - Completion: Response echoes updated settings; re-run `get` to confirm persistence.

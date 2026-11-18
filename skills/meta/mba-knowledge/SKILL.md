@@ -34,8 +34,8 @@ Don't use for:
   - Permission: `whatsapp_business_messaging`
   - Capability: `bizai_wa_enterprise_api_3p_access`
 - Python 3.10+ with stdlib only (scripts use `urllib`, `json`, `pathlib`, `mimetypes`)
-- **Config template:** `templates/config.example.json` — reference only; use `mba-setup` to create config
-- Payload templates in `templates/` — copy to `/tmp`, modify, pass via `--body-file`
+- **Config template:** `assets/config.example.json` — reference only; use `mba-setup` to create config
+- Payload templates in `assets/` — copy to `/tmp`, modify, pass via `--body-file`
 
 ### Missing Configuration
 If any script reports "Missing required env" or "ConfigError: Missing required env", **run the `mba-setup` skill immediately**:
@@ -43,7 +43,7 @@ If any script reports "Missing required env" or "ConfigError: Missing required e
 skill_view(name="mba-setup")
 ```
 Then follow the skill's guided setup to create `workspace/mba/config.json` with your `access_token` and `entity_id`. All MBA scripts auto-detect this config on subsequent runs.
-- Payload templates in `templates/` — copy to `/tmp`, modify, pass via `--body-file`
+- Payload templates in `assets/` — copy to `/tmp`, modify, pass via `--body-file`
 
 ## How to Run
 All operations go through the `terminal` tool invoking the skill's Python scripts.
@@ -92,7 +92,7 @@ terminal(command="python3 scripts/mba_ui_skills.py list", timeout=30)
    - Completion: Returns array of FAQ objects with `id`, `question`, `answer`, `status`.
 
 2. **Create FAQ**
-   - Copy `templates/faq.request.example.json` → `/tmp/faq.json`
+   - Copy `assets/faq.request.example.json` → `/tmp/faq.json`
    - Modify `question`, `answer` (max 1024 chars each), set `status: "ACTIVE"`
    - Run: `terminal(command="python3 scripts/mba_faq.py create --body-file /tmp/faq.json", timeout=30)`
    - Completion: Response contains new `id`; re-run `list` to confirm.
@@ -111,7 +111,7 @@ terminal(command="python3 scripts/mba_ui_skills.py list", timeout=30)
    - Completion: Returns array with `id`, `url`, `crawl_status`, `pages_crawled`, `last_crawled_at`.
 
 2. **Create website source**
-   - Copy `templates/websites.request.example.json` → `/tmp/web.json`
+   - Copy `assets/websites.request.example.json` → `/tmp/web.json`
    - Set `url` (public, HTTPS), optional `name`, `crawl_frequency`
    - Run: `terminal(command="python3 scripts/mba_websites.py create --body-file /tmp/web.json", timeout=30)`
    - Completion: Response contains `id` and `crawl_status: "in_progress"`.
@@ -137,7 +137,7 @@ terminal(command="python3 scripts/mba_ui_skills.py list", timeout=30)
    - Completion: Returns array with `id`, `name`, `instruction`, `status`.
 
 2. **Create skill**
-   - Copy `templates/skill.request.example.json` → `/tmp/skill.json`
+   - Copy `assets/skill.request.example.json` → `/tmp/skill.json`
    - Set `name`, `instruction` (max 8192 chars), `status: "ACTIVE"`
    - Run: `terminal(command="python3 scripts/mba_skills.py create --body-file /tmp/skill.json", timeout=30)`
    - Completion: Response contains `id`; re-run `list` to confirm.
@@ -153,7 +153,7 @@ terminal(command="python3 scripts/mba_ui_skills.py list", timeout=30)
    - Completion: Returns array with `id`, `component_type`, `trigger_instruction`, `status`.
 
 2. **Create UI skill**
-   - Copy `templates/uiskill.request.example.json` → `/tmp/uiskill.json`
+   - Copy `assets/uiskill.request.example.json` → `/tmp/uiskill.json`
    - Set `component_type` (`button`, `list`, `flow`), `trigger_instruction`, `payload`
    - For `flow` type: verify referenced Flow ID exists and is published before enabling
    - Run: `terminal(command="python3 scripts/mba_ui_skills.py create --body-file /tmp/uiskill.json", timeout=30)`
@@ -176,7 +176,7 @@ terminal(command="python3 scripts/mba_ui_skills.py list", timeout=30)
 - **Connector-backed behavior skills** — must name the connector tool, define deterministic routing, include exception handling, prohibit invented data not from connector response. For promo/voucher flows: explicitly forbid listing promos/vouchers unless returned by connector.
 - **Runtime test safety** — when opening `ai_audience` beyond `ALLOWLISTED_ONLY` for validation, save rollback payload first, run tests immediately, restore audience setting.
 - **Destructive ops require `--yes`** — all `delete` commands refuse without it.
-- **Payload generation** — never invent JSON; always use templates in `templates/`.
+- **Payload generation** — never invent JSON; always use templates in `assets/`.
 
 ## Verification
 - FAQ list/get/create/update/delete cycle completes with expected IDs and fields

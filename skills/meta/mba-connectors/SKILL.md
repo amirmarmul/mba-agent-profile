@@ -36,8 +36,8 @@ Don't use for:
   - Permission: `whatsapp_business_messaging`
   - Capability: `bizai_wa_enterprise_api_3p_access`
 - Python 3.10+ with stdlib only (scripts use `urllib`, `json`, `pathlib`, `uuid`, `mimetypes`)
-- **Config template:** `templates/config.example.json` — reference only; use `mba-setup` to create config
-- Payload templates in `templates/` — copy to `/tmp`, modify, pass via `--body-file`
+- **Config template:** `assets/config.example.json` — reference only; use `mba-setup` to create config
+- Payload templates in `assets/` — copy to `/tmp`, modify, pass via `--body-file`
 
 ### Missing Configuration
 If any script reports "Missing required env" or "ConfigError: Missing required env", **run the `mba-setup` skill immediately**:
@@ -82,7 +82,7 @@ terminal(command="python3 scripts/mba_connector_tools.py run <connector_id> <too
    - Completion: Returns array with `id`, `name`, `base_url`, `auth_type`, `description`.
 
 2. **Create connector (auth_type: NONE)**
-   - Copy `templates/connector.none.create.example.json` → `/tmp/connector.json`
+   - Copy `assets/connector.none.create.example.json` → `/tmp/connector.json`
    - Set `name`, `base_url` (must end with `/`), `description`, `auth_type: "NONE"`
    - Run: `terminal(command="python3 scripts/mba_connectors.py create --body-file /tmp/connector.json", timeout=30)`
    - Completion: Response contains `id`; **trailing slash on base_url is required** — see Pitfalls.
@@ -101,7 +101,7 @@ terminal(command="python3 scripts/mba_connector_tools.py run <connector_id> <too
 
 ### B. Connector API Key Auth
 1. **Upload API key credentials**
-   - Copy `templates/connector.auth.example.json` → `/tmp/auth.json`
+   - Copy `assets/connector.auth.example.json` → `/tmp/auth.json`
    - Set `api_key_location` (`HEADER` or `QUERY_PARAM`), `api_key_name`, `api_key_value`
    - Run: `terminal(command="python3 scripts/mba_connectors.py auth <id> --body-file /tmp/auth.json", timeout=30)`
    - Completion: Response confirms auth config; re-run `get <id>` to verify.
@@ -117,7 +117,7 @@ terminal(command="python3 scripts/mba_connector_tools.py run <connector_id> <too
    - Completion: Returns array with `id`, `name`, `description`, `method`, `path`, `status`.
 
 2. **Create tool**
-   - Copy `templates/tool.request.example.json` → `/tmp/tool.json`
+   - Copy `assets/tool.request.example.json` → `/tmp/tool.json`
    - Set `name`, `description`, `method` (`GET`/`POST`), `path` (relative to connector base_url), `input_schema`, `output_schema`
    - **Trailing slash on create endpoint matters** — see Pitfalls.
    - Run: `terminal(command="python3 scripts/mba_connector_tools.py create <connector_id> --body-file /tmp/tool.json", timeout=30)`
@@ -133,7 +133,7 @@ terminal(command="python3 scripts/mba_connector_tools.py run <connector_id> <too
 
 ### E. Connector Tool Run (Test)
 1. **Dry-run a tool**
-   - Copy `templates/tool.run.example.json` → `/tmp/run.json`
+   - Copy `assets/tool.run.example.json` → `/tmp/run.json`
    - Set `input` matching the tool's `input_schema`
    - Run: `terminal(command="python3 scripts/mba_connector_tools.py run <connector_id> <tool_id> --body-file /tmp/run.json", timeout=60)`
    - Completion: Returns `output` matching `output_schema` or error details; tool is usable only when run succeeds.
@@ -152,7 +152,7 @@ After any create/update/delete, verify real state in this order:
 - **Provisioning lag / pending action_id** — A tool can appear in `list`/`get` yet fail `run` with `Tool is not yet provisioned in Membrane (action_id is pending)`. Treat list/get success as metadata-only; tool is not usable until `run` succeeds.
 - **Delete/Archive quirk** — CLI delete can fail with internal Membrane archive/auth error (500) even when the same DELETE works manually. If delete returns 500, verify with `list` whether the object still exists before retrying. See `references/delete-archive-workaround.md`.
 - **Destructive ops require `--yes`** — all `delete` commands refuse without it.
-- **Payload generation** — never invent JSON; always use templates in `templates/`.
+- **Payload generation** — never invent JSON; always use templates in `assets/`.
 
 ## Verification
 - Connector list/get/create/update/delete cycle completes with expected IDs and fields

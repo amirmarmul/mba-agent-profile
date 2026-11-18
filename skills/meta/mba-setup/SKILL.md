@@ -32,7 +32,7 @@ Don't use for:
 - Internet access to Meta Business API
 - Your `META_ACCESS_TOKEN` and `META_ENTITY_ID` from Meta Business Portfolio System User
 
-**Config template:** `templates/config.example.json` — this skill writes the final `workspace/mba/config.json`; copy the template first if you want a reference.
+**Config template:** `assets/config.example.json` — this skill writes the final `workspace/mba/config.json`; copy the template first if you want a reference.
 
 ## How to Run
 All operations go through the `terminal` tool invoking this skill's Python script.
