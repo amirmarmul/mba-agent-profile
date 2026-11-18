@@ -8,7 +8,7 @@ platforms: [linux, macos, windows]
 metadata:
   hermes:
     tags: [meta-business-agent, whatsapp, ai-agent, knowledge, faq, skills]
-    related_skills: [mba-onboard, mba-connectors, mba-runtime]
+    related_skills: [mba-onboard, mba-connectors, mba-runtime, mba-setup]
 ---
 
 # MBA Knowledge & Skills Operator
@@ -28,13 +28,14 @@ Don't use for:
 - Running test messages, evals, handoffs, events → use `mba-runtime`
 
 ## Prerequisites
-- Profile workspace config at `workspace/mba/config.json` (created by `mba-setup`) OR `.env` in current working directory (deprecated)
-- If using `.env`: `META_ACCESS_TOKEN` and `META_ENTITY_ID` set — run `mba-setup` to migrate to workspace config
+- Profile workspace config at `workspace/mba/config.json` (created by `mba-setup`)
+- If config missing: run `mba-setup` skill to create it
 - Token must have:
   - Permission: `whatsapp_business_messaging`
   - Capability: `bizai_wa_enterprise_api_3p_access`
 - Python 3.10+ with stdlib only (scripts use `urllib`, `json`, `pathlib`, `mimetypes`)
-- **Config template:** `templates/config.example.json` — copy to `workspace/mba/config.json` and fill in your values if not using `mba-setup`
+- **Config template:** `templates/config.example.json` — reference only; use `mba-setup` to create config
+- Payload templates in `templates/` — copy to `/tmp`, modify, pass via `--body-file`
 
 ### Missing Configuration
 If any script reports "Missing required env" or "ConfigError: Missing required env", **run the `mba-setup` skill immediately**:
@@ -45,7 +46,7 @@ Then follow the skill's guided setup to create `workspace/mba/config.json` with 
 - Payload templates in `templates/` — copy to `/tmp`, modify, pass via `--body-file`
 
 ## How to Run
-All operations go through the `terminal` tool invoking the skill's Python scripts. The updated scripts now read config from `workspace/mba/config.json` first, falling back to `.env` in cwd with a deprecation warning.
+All operations go through the `terminal` tool invoking the skill's Python scripts.
 
 ### Example invocations
 ```
@@ -60,29 +61,29 @@ terminal(command="python3 scripts/mba_ui_skills.py list", timeout=30)
 ## Quick Reference
 | Operation | Command |
 |-----------|---------|
-| FAQ list | `python3 scripts/mba_faq.py list` |
-| FAQ get | `python3 scripts/mba_faq.py get <id>` |
-| FAQ create | `python3 scripts/mba_faq.py create --body-file /tmp/faq.json` |
-| FAQ update | `python3 scripts/mba_faq.py update <id> --body-file /tmp/faq.json` |
-| FAQ delete | `python3 scripts/mba_faq.py delete <id> --yes` |
-| Website list | `python3 scripts/mba_websites.py list` |
-| Website get | `python3 scripts/mba_websites.py get <id>` |
-| Website create | `python3 scripts/mba_websites.py create --body-file /tmp/web.json` |
-| Website update | `python3 scripts/mba_websites.py update <id> --body-file /tmp/web.json` |
-| Website delete | `python3 scripts/mba_websites.py delete <id> --yes` |
-| File list | `python3 scripts/mba_files.py list` |
-| File upload | `python3 scripts/mba_files.py upload /path/to/file.pdf --name "Policy 2026"` |
-| File delete | `python3 scripts/mba_files.py delete <id> --yes` |
-| Agent Skill list | `python3 scripts/mba_skills.py list` |
-| Agent Skill get | `python3 scripts/mba_skills.py get <id>` |
-| Agent Skill create | `python3 scripts/mba_skills.py create --body-file /tmp/skill.json` |
-| Agent Skill update | `python3 scripts/mba_skills.py update <id> --body-file /tmp/skill.json` |
-| Agent Skill delete | `python3 scripts/mba_skills.py delete <id> --yes` |
-| UI Skill list | `python3 scripts/mba_ui_skills.py list` |
-| UI Skill get | `python3 scripts/mba_ui_skills.py get <id>` |
-| UI Skill create | `python3 scripts/mba_ui_skills.py create --body-file /tmp/uiskill.json` |
-| UI Skill update | `python3 scripts/mba_ui_skills.py update <id> --body-file /tmp/uiskill.json` |
-| UI Skill delete | `python3 scripts/mba_ui_skills.py delete <id> --yes` |
+| FAQ list | `terminal(command="python3 scripts/mba_faq.py list", timeout=30)` |
+| FAQ get | `terminal(command="python3 scripts/mba_faq.py get <id>", timeout=30)` |
+| FAQ create | `terminal(command="python3 scripts/mba_faq.py create --body-file /tmp/faq.json", timeout=30)` |
+| FAQ update | `terminal(command="python3 scripts/mba_faq.py update <id> --body-file /tmp/faq.json", timeout=30)` |
+| FAQ delete | `terminal(command="python3 scripts/mba_faq.py delete <id> --yes", timeout=30)` |
+| Website list | `terminal(command="python3 scripts/mba_websites.py list", timeout=30)` |
+| Website get | `terminal(command="python3 scripts/mba_websites.py get <id>", timeout=30)` |
+| Website create | `terminal(command="python3 scripts/mba_websites.py create --body-file /tmp/web.json", timeout=30)` |
+| Website update | `terminal(command="python3 scripts/mba_websites.py update <id> --body-file /tmp/web.json", timeout=30)` |
+| Website delete | `terminal(command="python3 scripts/mba_websites.py delete <id> --yes", timeout=30)` |
+| File list | `terminal(command="python3 scripts/mba_files.py list", timeout=30)` |
+| File upload | `terminal(command="python3 scripts/mba_files.py upload /path/to/file.pdf --name "Policy 2026"", timeout=60)` |
+| File delete | `terminal(command="python3 scripts/mba_files.py delete <id> --yes", timeout=30)` |
+| Agent Skill list | `terminal(command="python3 scripts/mba_skills.py list", timeout=30)` |
+| Agent Skill get | `terminal(command="python3 scripts/mba_skills.py get <id>", timeout=30)` |
+| Agent Skill create | `terminal(command="python3 scripts/mba_skills.py create --body-file /tmp/skill.json", timeout=30)` |
+| Agent Skill update | `terminal(command="python3 scripts/mba_skills.py update <id> --body-file /tmp/skill.json", timeout=30)` |
+| Agent Skill delete | `terminal(command="python3 scripts/mba_skills.py delete <id> --yes", timeout=30)` |
+| UI Skill list | `terminal(command="python3 scripts/mba_ui_skills.py list", timeout=30)` |
+| UI Skill get | `terminal(command="python3 scripts/mba_ui_skills.py get <id>", timeout=30)` |
+| UI Skill create | `terminal(command="python3 scripts/mba_ui_skills.py create --body-file /tmp/uiskill.json", timeout=30)` |
+| UI Skill update | `terminal(command="python3 scripts/mba_ui_skills.py update <id> --body-file /tmp/uiskill.json", timeout=30)` |
+| UI Skill delete | `terminal(command="python3 scripts/mba_ui_skills.py delete <id> --yes", timeout=30)` |
 
 ## Procedure
 ### A. Knowledge: FAQs
@@ -97,7 +98,7 @@ terminal(command="python3 scripts/mba_ui_skills.py list", timeout=30)
    - Completion: Response contains new `id`; re-run `list` to confirm.
 
 3. **Update FAQ**
-   - Run `get <id>` → save response → modify `question`/`answer`/`status` → `update --body-file`
+   - Run: `terminal(command="python3 scripts/mba_faq.py get <id>", timeout=30)` → save response → modify `question`/`answer`/`status` → Run: `terminal(command="python3 scripts/mba_faq.py update <id> --body-file /tmp/faq.json", timeout=30)`
    - Completion: Response echoes updated fields; re-run `get` to confirm.
 
 4. **Delete FAQ**
@@ -116,7 +117,7 @@ terminal(command="python3 scripts/mba_ui_skills.py list", timeout=30)
    - Completion: Response contains `id` and `crawl_status: "in_progress"`.
 
 3. **Verify crawl readiness**
-   - Run `list` repeatedly until `crawl_status: "completed"` AND `pages_crawled > 0`
+   - Run: `terminal(command="python3 scripts/mba_websites.py list", timeout=30)` repeatedly until `crawl_status: "completed"` AND `pages_crawled > 0`
    - If stuck at `in_progress` with `pages_crawled: 0` for >10 min: treat as stuck; see Pitfalls.
 
 4. **Delete website**
@@ -142,7 +143,7 @@ terminal(command="python3 scripts/mba_ui_skills.py list", timeout=30)
    - Completion: Response contains `id`; re-run `list` to confirm.
 
 3. **Mutate skill (update/delete)**
-   - **Always inspect existing skills first** (`list` + `get`)
+   - **Always inspect existing skills first** (`terminal(command="python3 scripts/mba_skills.py list", timeout=30)` + `terminal(command="python3 scripts/mba_skills.py get <id>", timeout=30)`)
    - Draft payload locally, ask approval with exact command + impact, then execute
    - See `references/agent-skill-mutation-workflow.md` for full protocol.
 
@@ -159,10 +160,10 @@ terminal(command="python3 scripts/mba_ui_skills.py list", timeout=30)
    - Completion: Response contains `id`; re-run `list` to confirm.
 
 ### F. Audit Workflow: Company Information Validity
-1. Run `python3 scripts/mba_knowledge.py faq list` — inspect for stale dates, unsupported claims, risky superlatives.
-2. Run `python3 scripts/mba_knowledge.py web list` — verify `pages_crawled > 0` and `crawl_status: "completed"`.
-3. Run `python3 scripts/mba_knowledge.py skills list` — check for behavior instructions that cause invented facts (e.g., "look up contact info" without fallback).
-4. Run `python3 scripts/mba_ui_skills.py list` — ensure agent can send correct UI components instead of hallucinating links.
+1. Run: `terminal(command="python3 scripts/mba_knowledge.py faq list", timeout=30)` — inspect for stale dates, unsupported claims, risky superlatives.
+2. Run: `terminal(command="python3 scripts/mba_knowledge.py web list", timeout=30)` — verify `pages_crawled > 0` and `crawl_status: "completed"`.
+3. Run: `terminal(command="python3 scripts/mba_knowledge.py skills list", timeout=30)` — check for behavior instructions that cause invented facts (e.g., "look up contact info" without fallback).
+4. Run: `terminal(command="python3 scripts/mba_ui_skills.py list", timeout=30)` — ensure agent can send correct UI components instead of hallucinating links.
 5. If runtime tests fail with `ELIGIBILITY_CHECK_FAILED`, pivot to `mba-onboard` checks first.
 6. Categorize findings: stale facts, unsupported claims, missing sources, risky instructions, broken UI, blocked runtime.
 7. For dated operational facts (holiday hours, "besok", event dates): recommend delete/replace unless current calendar provided.

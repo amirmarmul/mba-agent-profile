@@ -8,7 +8,7 @@ platforms: [linux, macos, windows]
 metadata:
   hermes:
     tags: [meta-business-agent, whatsapp, ai-agent, test, eval, handoff, thread-control]
-    related_skills: [mba-onboard, mba-knowledge, mba-connectors]
+    related_skills: [mba-onboard, mba-knowledge, mba-connectors, mba-setup]
 ---
 
 # MBA Runtime & Eval Operator
@@ -29,14 +29,14 @@ Don't use for:
 - Connectors or connector tools → use `mba-connectors`
 
 ## Prerequisites
-- Profile workspace config at `workspace/mba/config.json` (created by `mba-setup`) OR `.env` in current working directory (deprecated)
-- If using `.env`: `META_ACCESS_TOKEN` and `META_ENTITY_ID` set — run `mba-setup` to migrate to workspace config
+- Profile workspace config at `workspace/mba/config.json` (created by `mba-setup`)
+- If config missing: run `mba-setup` skill to create it
 - Token must have:
   - Permission: `whatsapp_business_messaging`
   - Capability: `bizai_wa_enterprise_api_3p_access`
 - Python 3.10+ with stdlib only (scripts use `urllib`, `json`, `pathlib`)
-- **Config template:** `templates/config.example.json` — copy to `workspace/mba/config.json` and fill in your values if not using `mba-setup`
 - For test/eval: agent must be eligible (`mba-onboard` eligibility check passes) and tester must be allowlisted if `ai_audience: "ALLOWLISTED_ONLY"`
+- **Config template:** `templates/config.example.json` — reference only; use `mba-setup` to create config
 
 ### Missing Configuration
 If any script reports "Missing required env" or "ConfigError: Missing required env", **run the `mba-setup` skill immediately**:
@@ -46,7 +46,7 @@ skill_view(name="mba-setup")
 Then follow the skill's guided setup to create `workspace/mba/config.json` with your `access_token` and `entity_id`. All MBA scripts auto-detect this config on subsequent runs.
 
 ## How to Run
-All operations go through the `terminal` tool invoking the skill's Python scripts. The updated scripts now read config from `workspace/mba/config.json` first, falling back to `.env` in cwd with a deprecation warning.
+All operations go through the `terminal` tool invoking the skill's Python scripts.
 
 ### Example invocations
 ```
@@ -60,17 +60,17 @@ terminal(command="python3 scripts/mba_runtime.py event <consumer_wa_id> --body-f
 ## Quick Reference
 | Operation | Command |
 |-----------|---------|
-| Test agent (single turn) | `python3 scripts/mba_test.py "message" --save` |
-| Test agent (multi-turn) | `python3 scripts/mba_test.py "followup" --conversation-id <conv_id> --save` |
-| List eval cases | `python3 scripts/mba_eval.py cases` |
-| Run eval job | `python3 scripts/mba_eval.py run --eval-case-ids pfbid1,pfbid2 --body-file /tmp/eval.json` |
-| Eval job status | `python3 scripts/mba_eval.py status <job_id>` |
-| Eval summary | `python3 scripts/mba_eval.py summary --summary-ids <summary_id>` |
-| Eval details | `python3 scripts/mba_eval.py details --eval-ids <eval_id>` |
-| Handoff: pass to human | `python3 scripts/mba_runtime.py thread-control pass <consumer_wa_id>` |
-| Handoff: release to agent | `python3 scripts/mba_runtime.py thread-control release <consumer_wa_id>` |
-| Trigger event | `python3 scripts/mba_runtime.py event <consumer_wa_id> --body-file /tmp/event.json` |
-| Event status | `python3 scripts/mba_runtime.py event-status <event_id>` |
+| Test agent (single turn) | `terminal(command="python3 scripts/mba_test.py "message" --save", timeout=30)` |
+| Test agent (multi-turn) | `terminal(command="python3 scripts/mba_test.py \\"followup\\" --conversation-id <conv_id> --save", timeout=30)` |
+| List eval cases | `terminal(command="python3 scripts/mba_eval.py cases", timeout=30)` |
+| Run eval job | `terminal(command="python3 scripts/mba_eval.py run --eval-case-ids pfbid1,pfbid2 --body-file /tmp/eval.json", timeout=60)` |
+| Eval job status | `terminal(command="python3 scripts/mba_eval.py status <job_id>", timeout=30)` |
+| Eval summary | `terminal(command="python3 scripts/mba_eval.py summary --summary-ids <summary_id>", timeout=30)` |
+| Eval details | `terminal(command="python3 scripts/mba_eval.py details --eval-ids <eval_id>", timeout=30)` |
+| Handoff: pass to human | `terminal(command="python3 scripts/mba_runtime.py thread-control pass <consumer_wa_id>", timeout=30)` |
+| Handoff: release to agent | `terminal(command="python3 scripts/mba_runtime.py thread-control release <consumer_wa_id>", timeout=30)` |
+| Trigger event | `terminal(command="python3 scripts/mba_runtime.py event <consumer_wa_id> --body-file /tmp/event.json", timeout=30)` |
+| Event status | `terminal(command="python3 scripts/mba_runtime.py event-status <event_id>", timeout=30)` |
 
 ## Procedure
 ### A. Test Agent

@@ -8,7 +8,7 @@ platforms: [linux, macos, windows]
 metadata:
   hermes:
     tags: [meta-business-agent, whatsapp, ai-agent, connectors, api, tools]
-    related_skills: [mba-onboard, mba-knowledge, mba-runtime]
+    related_skills: [mba-onboard, mba-knowledge, mba-runtime, mba-setup]
 ---
 
 # MBA Connectors Operator
@@ -30,13 +30,13 @@ Don't use for:
 - Test messages, evals, handoffs, events → use `mba-runtime`
 
 ## Prerequisites
-- Profile workspace config at `workspace/mba/config.json` (created by `mba-setup`) OR `.env` in current working directory (deprecated)
-- If using `.env`: `META_ACCESS_TOKEN` and `META_ENTITY_ID` set — run `mba-setup` to migrate to workspace config
+- Profile workspace config at `workspace/mba/config.json` (created by `mba-setup`)
+- If config missing: run `mba-setup` skill to create it
 - Token must have:
   - Permission: `whatsapp_business_messaging`
   - Capability: `bizai_wa_enterprise_api_3p_access`
 - Python 3.10+ with stdlib only (scripts use `urllib`, `json`, `pathlib`, `uuid`, `mimetypes`)
-- **Config template:** `templates/config.example.json` — copy to `workspace/mba/config.json` and fill in your values if not using `mba-setup`
+- **Config template:** `templates/config.example.json` — reference only; use `mba-setup` to create config
 - Payload templates in `templates/` — copy to `/tmp`, modify, pass via `--body-file`
 
 ### Missing Configuration
@@ -47,7 +47,7 @@ skill_view(name="mba-setup")
 Then follow the skill's guided setup to create `workspace/mba/config.json` with your `access_token` and `entity_id`. All MBA scripts auto-detect this config on subsequent runs.
 
 ## How to Run
-All operations go through the `terminal` tool invoking the skill's Python scripts. The updated scripts now read config from `workspace/mba/config.json` first, falling back to `.env` in cwd with a deprecation warning.
+All operations go through the `terminal` tool invoking the skill's Python scripts.
 
 ### Example invocations
 ```
@@ -61,19 +61,19 @@ terminal(command="python3 scripts/mba_connector_tools.py run <connector_id> <too
 ## Quick Reference
 | Operation | Command |
 |-----------|---------|
-| Connector list | `python3 scripts/mba_connectors.py list` |
-| Connector get | `python3 scripts/mba_connectors.py get <id>` |
-| Connector create (no auth) | `python3 scripts/mba_connectors.py create --body-file /tmp/connector.json` |
-| Connector update | `python3 scripts/mba_connectors.py update <id> --body-file /tmp/connector.json` |
-| Connector delete | `python3 scripts/mba_connectors.py delete <id> --yes` |
-| Connector auth (API_KEY) | `python3 scripts/mba_connectors.py auth <id> --body-file /tmp/auth.json` |
-| Connector logs | `python3 scripts/mba_connectors.py logs <id> --limit 100 --include-stats` |
-| Tool list | `python3 scripts/mba_connector_tools.py list <connector_id>` |
-| Tool get | `python3 scripts/mba_connector_tools.py get <connector_id> <tool_id>` |
-| Tool create | `python3 scripts/mba_connector_tools.py create <connector_id> --body-file /tmp/tool.json` |
-| Tool update | `python3 scripts/mba_connector_tools.py update <connector_id> <tool_id> --body-file /tmp/tool.json` |
-| Tool delete | `python3 scripts/mba_connector_tools.py delete <connector_id> <tool_id> --yes` |
-| Tool run (test) | `python3 scripts/mba_connector_tools.py run <connector_id> <tool_id> --body-file /tmp/run.json` |
+| Connector list | `terminal(command="python3 scripts/mba_connectors.py list", timeout=30)` |
+| Connector get | `terminal(command="python3 scripts/mba_connectors.py get <id>", timeout=30)` |
+| Connector create (no auth) | `terminal(command="python3 scripts/mba_connectors.py create --body-file /tmp/connector.json", timeout=30)` |
+| Connector update | `terminal(command="python3 scripts/mba_connectors.py update <id> --body-file /tmp/connector.json", timeout=30)` |
+| Connector delete | `terminal(command="python3 scripts/mba_connectors.py delete <id> --yes", timeout=30)` |
+| Connector auth (API_KEY) | `terminal(command="python3 scripts/mba_connectors.py auth <id> --body-file /tmp/auth.json", timeout=30)` |
+| Connector logs | `terminal(command="python3 scripts/mba_connectors.py logs <id> --limit 100 --include-stats", timeout=30)` |
+| Tool list | `terminal(command="python3 scripts/mba_connector_tools.py list <connector_id>", timeout=30)` |
+| Tool get | `terminal(command="python3 scripts/mba_connector_tools.py get <connector_id> <tool_id>", timeout=30)` |
+| Tool create | `terminal(command="python3 scripts/mba_connector_tools.py create <connector_id> --body-file /tmp/tool.json", timeout=30)` |
+| Tool update | `terminal(command="python3 scripts/mba_connector_tools.py update <connector_id> <tool_id> --body-file /tmp/tool.json", timeout=30)` |
+| Tool delete | `terminal(command="python3 scripts/mba_connector_tools.py delete <connector_id> <tool_id> --yes", timeout=30)` |
+| Tool run (test) | `terminal(command="python3 scripts/mba_connector_tools.py run <connector_id> <tool_id> --body-file /tmp/run.json", timeout=60)` |
 
 ## Procedure
 ### A. Connectors CRUD

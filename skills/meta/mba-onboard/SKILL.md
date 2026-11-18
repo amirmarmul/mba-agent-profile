@@ -8,7 +8,7 @@ platforms: [linux, macos, windows]
 metadata:
   hermes:
     tags: [meta-business-agent, whatsapp, ai-agent, onboard, allowlist]
-    related_skills: [mba-knowledge, mba-connectors, mba-runtime]
+    related_skills: [mba-knowledge, mba-connectors, mba-runtime, mba-setup]
 ---
 
 # MBA Onboard Operator
@@ -29,13 +29,13 @@ Don't use for:
 - Running test messages, evals, handoffs, or events → use `mba-runtime`
 
 ## Prerequisites
-- Profile workspace config at `workspace/mba/config.json` (created by `mba-setup`) OR `.env` in current working directory (deprecated)
-- If using `.env`: `META_ACCESS_TOKEN` and `META_ENTITY_ID` set — run `mba-setup` to migrate to workspace config
+- Profile workspace config at `workspace/mba/config.json` (created by `mba-setup`)
+- If config missing: run `mba-setup` skill to create it
 - Token must have:
   - Permission: `whatsapp_business_messaging`
   - Capability: `bizai_wa_enterprise_api_3p_access`
 - Python 3.10+ with stdlib only (scripts use `urllib`, `json`, `pathlib`)
-- **Config template:** `templates/config.example.json` — copy to `workspace/mba/config.json` and fill in your values if not using `mba-setup`
+- **Config template:** `templates/config.example.json` — reference only; use `mba-setup` to create config
 
 ### Missing Configuration
 If any script reports "Missing required env" or "ConfigError: Missing required env", **run the `mba-setup` skill immediately**:
@@ -45,7 +45,7 @@ skill_view(name="mba-setup")
 Then follow the skill's guided setup to create `workspace/mba/config.json` with your `access_token` and `entity_id`. All MBA scripts auto-detect this config on subsequent runs.
 
 ## How to Run
-All operations go through the `terminal` tool invoking the skill's Python scripts. The updated scripts now read config from `workspace/mba/config.json` first, falling back to `.env` in cwd with a deprecation warning.
+All operations go through the `terminal` tool invoking the skill's Python scripts.
 
 ### Example invocations
 ```
@@ -60,12 +60,12 @@ terminal(command="python3 scripts/mba_allowlist.py remove <entry_id> --yes", tim
 ## Quick Reference
 | Operation | Command |
 |-----------|---------|
-| Check eligibility | `python3 scripts/mba_eligibility.py` |
-| Get settings | `python3 scripts/mba_settings.py get` |
-| Update settings | `python3 scripts/mba_settings.py update --body-file /tmp/settings.json` |
-| List allowlist | `python3 scripts/mba_allowlist.py list` |
-| Add to allowlist | `python3 scripts/mba_allowlist.py add --entity +628xxxxxxxxx` |
-| Remove from allowlist | `python3 scripts/mba_allowlist.py remove <entry_id> --yes` |
+| Check eligibility | `terminal(command="python3 scripts/mba_eligibility.py", timeout=30)` |
+| Get settings | `terminal(command="python3 scripts/mba_settings.py get", timeout=30)` |
+| Update settings | `terminal(command="python3 scripts/mba_settings.py update --body-file /tmp/settings.json", timeout=30)` |
+| List allowlist | `terminal(command="python3 scripts/mba_allowlist.py list", timeout=30)` |
+| Add to allowlist | `terminal(command="python3 scripts/mba_allowlist.py add --entity +628xxxxxxxxx", timeout=30)` |
+| Remove from allowlist | `terminal(command="python3 scripts/mba_allowlist.py remove <entry_id> --yes", timeout=30)` |
 
 ## Procedure
 ### 1. Check eligibility
