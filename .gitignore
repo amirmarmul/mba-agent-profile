@@ -26,7 +26,7 @@ memories/
 sessions/
 logs/
 plans/
-workspace/
+mba/
 home/
 
 # Caches & generated artifacts
@@ -41,14 +41,14 @@ provider_models_cache.json
 .skills_prompt_snapshot.json
 
 # Infrastructure (should not be in profile dir, but safe to exclude)
-hermes-agent/
-.worktrees/
-profiles/
-bin/
-node_modules/
+/hermes-agent/
+/.worktrees/
+/profiles/
+/bin/
+/node_modules/
 
 # User customization namespace — your local overrides
-local/
+/local/
 
 # Checkpoints & backups (can be huge)
 checkpoints/
@@ -76,3 +76,29 @@ runtime/
 cron/*
 !cron/jobs.json
 skills/.*
+
+# Local Hermes profile config (machine-specific)
+config.yaml
+
+# Additional local runtime artifacts
+.curator_backups/
+lsp/
+vault/
+projects.db
+gateway.lock
+log_hash_salt
+skills/meta/mba-runtime/mba/
+
+# Additional credential stores & tenant data
+platforms/
+state-snapshots/
+mcp-tokens/
+*.bak*
+*.pem
+.op.env
+npmrc
+honcho.json
+mem0.json
+teams_pipeline_store.json
+.ssh/
+.aws/

@@ -1,12 +1,10 @@
 ---
 name: mba-runtime
-description: "Use to test Meta Business Agent (MBA) conversation routing, run evaluations, simulate test messages, and manage Thread Control (handoff to human agents)."
+description: "Test MBA routing, run evals, manage handoff, trigger events."
 version: 1.0.0
 author: Hermes Agent
 license: MIT
-prerequisites:
-  commands:
-    - mba
+platforms: [linux, macos, windows]
 metadata:
   hermes:
     category: meta

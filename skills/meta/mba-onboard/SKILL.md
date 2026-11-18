@@ -1,12 +1,10 @@
 ---
 name: mba-onboard
-description: "Use to onboard a phone number to Meta Business Agent (MBA), check eligibility, manage high-level agent settings, and configure the allowlist for testing."
+description: "Onboard phones to MBA, check eligibility, manage settings."
 version: 1.0.0
 author: Hermes Agent
 license: MIT
-prerequisites:
-  commands:
-    - mba
+platforms: [linux, macos, windows]
 metadata:
   hermes:
     category: meta
@@ -54,4 +52,3 @@ python3 scripts/mba_allowlist.py remove <entry_id> --yes
 ### References
 - `references/agent-settings-rules.md` - Schema for AI audience, handoff, and rollout settings.
 - `references/common-api-requirements.md` - Required tokens, capabilities, and shared error codes.
-

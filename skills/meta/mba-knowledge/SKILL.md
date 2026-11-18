@@ -1,9 +1,10 @@
 ---
 name: mba-knowledge
-description: "Use to manage Meta Business Agent (MBA) Knowledge Base (FAQs, Websites, Files) and Agent Skills (Instructions/Behavior)."
+description: "Manage MBA Knowledge Base (FAQs, Websites) and Skills."
 version: 1.0.0
 author: Hermes Agent
 license: MIT
+platforms: [linux, macos, windows]
 metadata:
   hermes:
     category: meta
@@ -13,7 +14,7 @@ metadata:
 # MBA Knowledge & Skills Operator
 
 ## Overview
-This skill manages what the agent knows (Knowledge) and how it behaves (Skills/Instructions). 
+This skill manages what the agent knows (Knowledge) and how it behaves (Skills/Instructions).
 Knowledge facts (FAQs, PDFs, Websites) ground the agent's answers. Skills define its tone and behavior constraints.
 
 ## Environment & Tooling
@@ -76,13 +77,13 @@ python3 scripts/mba_ui_skills.py delete <id> --yes
 When auditing whether an MBA has valid company information, run read-only checks first and report evidence, not assumptions:
 1. `python3 scripts/mba_knowledge.py faq list` — inspect all FAQ questions/answers for stale dates, unsupported claims, contact data, service descriptions, and risky superlatives.
 2. `python3 scripts/mba_knowledge.py web list` — verify web sources have usable crawl output. Treat `pages_crawled: 0` or long-running `crawl_status: in_progress` as not yet useful grounding.
-3. `python3 scripts/mba_knowledge.py skills list` — inspect behavior instructions that may cause invented customer/company facts (for example: “look up contact info” without fallback rules).
+3. `python3 scripts/mba_knowledge.py skills list` — inspect behavior instructions that may cause invented customer/company facts (for example: "look up contact info" without fallback rules).
 4. `python3 scripts/mba_ui_skills.py list` — review the agent's interactive UI components and their trigger instructions. Ensure the agent is permitted to send correct UI components (like a CTA button) instead of hallucinating links.
 5. If runtime tests fail with `ELIGIBILITY_CHECK_FAILED`, pivot to `mba-onboard` checks (`settings get`, `allowlist list`) before judging answer quality.
 6. Categorize findings as: stale/dated facts, unsupported claims needing source docs, missing grounding sources, risky behavior instructions, broken/missing UI components, and blocked runtime validation.
 
-For dated operational facts (holiday hours, “besok”, event dates), recommend deleting or replacing with a source-of-truth answer unless the user provides current operating calendar data.
-For big credibility claims (client counts, partner status, certifications, delivery rates, “only BSP”, notable clients), ask for verifiable company sources such as website pages, company profile PDF, certificates, case studies, or sales deck before promoting them as stable customer-facing knowledge.
+For dated operational facts (holiday hours, "besok", event dates), recommend deleting or replacing with a source-of-truth answer unless the user provides current operating calendar data.
+For big credibility claims (client counts, partner status, certifications, delivery rates, "only BSP", notable clients), ask for verifiable company sources such as website pages, company profile PDF, certificates, case studies, or sales deck before promoting them as stable customer-facing knowledge.
 
 ## Important Rules
 - **Destructive Actions**: Always require the `--yes` flag (e.g., `delete`).
@@ -100,4 +101,3 @@ For big credibility claims (client counts, partner status, certifications, deliv
 - `references/website-knowledge-crawl-status.md` - Crawl status enums and stuck behavior.
 - `references/agent-skill-authoring-rules.md` - Schema and logical constraints for skill creation.
 - `references/ui-skills-workflow.md` - Theory, benefits, and step-by-step workflow for configuring Interactive UI components.
-

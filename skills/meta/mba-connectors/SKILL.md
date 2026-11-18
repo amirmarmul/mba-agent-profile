@@ -1,12 +1,10 @@
 ---
 name: mba-connectors
-description: "Use to manage Meta Business Agent (MBA) Connectors, Connector Tools, and Authentication. Enables the agent to call external third-party APIs."
+description: "Manage MBA Connectors and Tools for external API access."
 version: 1.0.0
 author: Hermes Agent
 license: MIT
-prerequisites:
-  commands:
-    - mba
+platforms: [linux, macos, windows]
 metadata:
   hermes:
     category: meta
@@ -78,4 +76,3 @@ python3 scripts/mba_connector_tools.py run <connector_id> <tool_id> --body-file 
 - `references/connector-schema-rules.md` - Required fields and auth types for Connectors.
 - `references/tool-schema-authoring-rules.md` - Required fields and schema constraints for Connector Tools.
 - `references/tool-user-auth-patterns.md` - Configuration extraction rules for user authentication in tools.
-
