@@ -77,8 +77,6 @@ cron/*
 !cron/jobs.json
 skills/.*
 
-# Local Hermes profile config (machine-specific)
-config.yaml
 
 # Additional local runtime artifacts
 .curator_backups/
