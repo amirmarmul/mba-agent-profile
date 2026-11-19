@@ -80,6 +80,8 @@ skills/.*
 
 
 # Additional local runtime artifacts
+context_length_cache.yaml
+context_length_cache.yaml.lock
 .curator_backups/
 lsp/
 vault/

@@ -74,7 +74,8 @@ metadata:
 - State the capability, not the implementation, and don't repeat the skill name or its category name (the index prints the category above the skill).
 - No marketing words ("powerful", "comprehensive", "seamless", "advanced").
 - 60 is the width the system prompt skill index shows; `skill_manage` rejects a new or changed description over it, and the index clips a longer legacy one at a word boundary.
-- If the description contains a `:`, wrap it in double quotes or YAML parses it as a mapping and the docs generator crashes. Quotes don't count toward the 60.
+- If the description contains a `:`, wrap it in double quotes — an unquoted `: ` breaks YAML parsing, the fallback line parser turns `platforms` into a string, the skill drops from `skills_list`, and `skill_view` reports "not supported on this platform" instead of a YAML error. `skill_manage(action='patch')` can still repair the frontmatter while `skill_view` refuses the skill (`create` refuses the existing name); after fixing the quotes, confirm the skill loads via `skill_view`. Quotes don't count toward the 60.
+- Frontmatter edits through the raw `patch` tool bypass `skill_manage`'s description validation; after any frontmatter edit, confirm the skill still appears in `skills_list` and loads via `skill_view`.
 
 Good: `Track named companies for material news with cited digests.`
 Bad: `Use when a user asks to monitor named competitors or companies for product launches, pricing changes, funding, ...` (240 chars — rejected in review)
