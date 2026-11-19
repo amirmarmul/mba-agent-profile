@@ -51,6 +51,15 @@ provider_models_cache.json
 # User customization namespace — your local overrides
 /local/
 
+# Local-only authoring/tooling skills — never part of the distribution
+skills/autonomous-ai-agents/
+skills/grill-me/
+skills/grill-with-docs/
+skills/grilling/
+skills/hermes-profile-distribution/
+skills/software-development/
+skills/writing-for-agents/
+
 # Checkpoints & backups (can be huge)
 checkpoints/
 sandboxes/
