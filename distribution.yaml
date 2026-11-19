@@ -1,20 +1,15 @@
 name: meta-mba-agent
-version: 1.0.0
-description: "A Hermes Agent skill pack for Meta business agent operations."
+version: 1.1.0
+description: "Hermes profile for Meta Business Agent ops: get-started wizard, knowledge, connectors, runtime, health checks."
 hermes_requires: ">=0.23.0"
 license: "MIT"
 author: "Amir Marmul"
 
-env_requires:
-  - name: META_ACCESS_TOKEN
-    description: "Meta Graph API access token used by mba CLI and direct Graph API workflows"
-    required: true
-  - name: META_ENTITY_ID
-    description: "Default Meta entity id for managing and Graph API workflows."
-    required: true
+# Credentials are collected by the mba-get-started wizard into
+# workspace/mba/config.json (gitignored). No env vars are consumed,
+# so env_requires is intentionally empty.
 
 distribution_owned:
   - SOUL.md
-  - config.yaml
   - distribution.yaml
   - skills/meta/

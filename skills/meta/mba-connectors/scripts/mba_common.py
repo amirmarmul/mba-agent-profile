@@ -22,9 +22,16 @@ DEFAULT_API_VERSION = "2.0.0"
 
 # Profile workspace config path (Hermes profile root + workspace/mba/config.json)
 def _profile_workspace_config_path() -> Path:
-    """Return the profile workspace config path: <HERMES_PROFILE_DIR>/workspace/mba/config.json"""
-    profile_dir = os.getenv("HERMES_PROFILE_DIR") or os.getcwd()
-    return Path(profile_dir) / "workspace" / "mba" / "config.json"
+    """Return <profile>/workspace/mba/config.json.
+    Resolution order: HERMES_PROFILE_DIR env > script location (skills/meta/<skill>/scripts/) > cwd."""
+    env = os.getenv("HERMES_PROFILE_DIR")
+    if env:
+        return Path(env) / "workspace" / "mba" / "config.json"
+    here = Path(__file__).resolve()
+    for parent in here.parents:
+        if parent.name == "meta" and parent.parent.name == "skills":
+            return parent.parent.parent / "workspace" / "mba" / "config.json"
+    return Path(os.getcwd()) / "workspace" / "mba" / "config.json"
 
 
 class ConfigError(RuntimeError):
@@ -65,28 +72,12 @@ class MetaConfig:
             except (json.JSONDecodeError, OSError):
                 pass  # fall through to .env
 
-        # 2) Fallback: .env in current working directory (deprecated)
-        access_token = os.getenv("META_ACCESS_TOKEN", "").strip()
-        entity_id = os.getenv("META_ENTITY_ID", "").strip()
-        api_version = os.getenv("META_API_VERSION", DEFAULT_API_VERSION).strip() or DEFAULT_API_VERSION
-        base_url = os.getenv("META_BASE_URL", DEFAULT_BASE_URL).strip() or DEFAULT_BASE_URL
-
-        if access_token and entity_id:
-            print("WARNING: .env config is deprecated. Run 'mba-setup' to migrate to workspace/mba/config.json", file=sys.stderr)
-
-        missing: list[str] = []
-        if not access_token:
-            missing.append("META_ACCESS_TOKEN")
-        if not entity_id:
-            missing.append("META_ENTITY_ID")
-        if missing:
-            raise ConfigError("Missing required env: " + ", ".join(missing) + ". Run 'mba-setup' to configure.")
-
-        return cls(
-            access_token=access_token,
-            entity_id=entity_id,
-            api_version=api_version,
-            base_url=base_url.rstrip("/"),
+        # 2) No workspace config: fail fast. Env vars are never used as
+        # credentials (tenant isolation); mba-get-started is the single gate.
+        raise ConfigError(
+            f"MBA config missing or incomplete at {workspace_config}. "
+            "Run the 'mba-get-started' skill: it asks the user for META_ACCESS_TOKEN "
+            "and META_ENTITY_ID, then writes the config."
         )
 
     def url(self, path: str, query: dict[str, Any] | None = None) -> str:
@@ -194,8 +185,7 @@ def print_json(value: Any) -> None:
 
 def _workspace_output_root(entity_id: str) -> Path:
     """Return workspace/mba/<ENTITY_ID>/ under the profile workspace."""
-    profile_dir = os.getenv("HERMES_PROFILE_DIR") or os.getcwd()
-    return Path(profile_dir) / "workspace" / "mba" / entity_id
+    return _profile_workspace_config_path().parent / entity_id
 
 
 def write_run_output(kind: str, payload: Any, prefix: str = "run", skill: str = "connectors") -> Path:

@@ -1,88 +1,67 @@
-# meta-mba-agent — Hermes Agent Distribution
+# mba-agent-profile — MBA Ops Assistant
 
-A Hermes Agent skill pack for Meta Business Agent operations.
+A Hermes Agent profile distribution that turns Hermes into an ops assistant for
+WhatsApp Meta Business Agents: guided get-started, knowledge and connector
+management, testing/evals, and on-demand health checks with next-action
+recommendations. Built for non-technical ops teams; technical detail stays
+hidden unless you ask for "mode teknis".
 
-## Profile
+Distribution: `meta-mba-agent@1.1.0` · profile name: `mba-agent`
 
-- **Name**: `mba-agent`
-- **Distribution**: `meta-mba-agent@1.0.0`
-- **Active profile**: `mba-agent` (alias: `mba-agent` → `hermes -p mba-agent`)
+## What you need from IT
 
-## Model / Provider
+One package, two values:
 
-This profile uses an **empty model sentinel** (`model: ""`). After install, configure your model via:
+| Value | What it is |
+|-------|-----------|
+| Access token | Meta System User token with capability `bizai_wa_enterprise_api_3p_access` |
+| Entity ID | Numeric WhatsApp Business **Phone Number ID** (not the WABA ID) |
 
-```bash
-hermes setup          # interactive setup (picks provider, API keys)
-# or
-hermes model          # change model from CLI
-# or
-# Dashboard → Models → Change
-```
+One installation serves one tenant (one business number).
 
-Supported providers: OpenRouter, OpenAI, Anthropic, Google (Gemini/Vertex), Nous Portal, xAI, DeepSeek, and 20+ more via OpenRouter.
+## Install
 
-Your `HERMES_CUSTOM_LLM_API_KEY` env var is available if you wired a custom endpoint; otherwise the installer will set their own provider key in `.env`.
-
-## Meta Credentials
-
-Required env vars (set in `.env`):
-
-| Variable | Description |
-|----------|-------------|
-| `META_ACCESS_TOKEN` | Meta Graph API access token |
-| `META_ENTITY_ID` | Default Meta entity ID for API workflows |
-
-See `AGENTS.md` (workspace operating rules) and `SOUL.md` (agent identity) for full context.
-
-## Skills (installed)
-
-| Skill | Category | Source |
-|-------|----------|--------|
-| `mba-onboard` | meta | local |
-| `mba-knowledge` | meta | local |
-| `mba-connectors` | meta | local |
-| `mba-runtime` | meta | local |
-| `hermes-agent-skill-authoring` | software-development | official |
-
-## Usage
+Prerequisite: Hermes is installed on your PC and your model/provider is already
+configured (this distribution does not ship `config.yaml` and never touches
+your model settings).
 
 ```bash
-hermes -p mba-agent chat     # start chatting with the MBA agent
-hermes -p mba-agent skills   # list installed skills
-hermes -p mba-agent profile  # profile info
+hermes profile install github.com/amirmarmul/mba-agent-profile --name mba-agent --alias
+hermes -p mba-agent chat
 ```
 
-## Installation (for installers)
+On the first chat the agent automatically runs the get-started wizard:
+a short orientation, then it asks for the token and entity ID (one question at
+a time), proves the Meta API connection, and recommends your next action.
+No commands to memorize.
+
+## Update
 
 ```bash
-# From this repo (local):
-hermes profile install /path/to/mba-agent --name mba-agent --alias
-
-# Or from git (after push + tag):
-hermes profile install github.com/you/meta-mba-agent --name mba-agent --alias
+hermes profile update mba-agent
 ```
 
-## Distribution Manifest (`distribution.yaml`)
+Updates replace the shipped skills and SOUL.md; your `config.yaml`, `.env`,
+`workspace/`, and memories are preserved.
 
-Key fields:
+## Skills
 
-```yaml
-name: meta-mba-agent
-version: 1.0.0
-hermes_requires: ">=0.23.0"
-author: Amir Marmul
-license: MIT
+| Skill | Purpose |
+|-------|---------|
+| `mba-get-started` | Front door: wizard, credential gate, health check + next action |
+| `mba-onboard` | Eligibility, agent settings, rollout allowlist |
+| `mba-knowledge` | FAQs, websites, files, agent/UI skills |
+| `mba-connectors` | Connectors, tools, auth, logs |
+| `mba-runtime` | Test messages, evals, handoff, events |
 
-env_requires:
-  - name: META_ACCESS_TOKEN
-    required: true
-  - name: META_ENTITY_ID
-    required: true
+## Daily use
 
-distribution_owned:
-  - SOUL.md
-  - config.yaml
-  - distribution.yaml
-  - skills/meta/
-```
+Just talk to the agent: "cek kesehatan agent", "tambah FAQ tentang jam buka",
+"test bot dengan pertanyaan refund". The agent reads real state before every
+change and asks for confirmation in plain language before mutating anything.
+
+## Where credentials live
+
+`workspace/mba/config.json` — written by the wizard, gitignored, never
+distributed. A leaked token is rotated by asking the agent to change
+credentials (it confirms before overwriting).

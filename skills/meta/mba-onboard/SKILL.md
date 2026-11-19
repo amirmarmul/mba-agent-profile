@@ -8,7 +8,7 @@ platforms: [linux, macos, windows]
 metadata:
   hermes:
     tags: [meta-business-agent, whatsapp, ai-agent, onboard, allowlist]
-    related_skills: [mba-knowledge, mba-connectors, mba-runtime, mba-setup]
+    related_skills: [mba-knowledge, mba-connectors, mba-runtime, mba-get-started]
 ---
 
 # MBA Onboard Operator
@@ -29,20 +29,15 @@ Don't use for:
 - Running test messages, evals, handoffs, or events → use `mba-runtime`
 
 ## Prerequisites
-- Profile workspace config at `workspace/mba/config.json` (created by `mba-setup`)
-- If config missing: run `mba-setup` skill to create it
-- Token must have:
-  - Permission: `whatsapp_business_messaging`
-  - Capability: `bizai_wa_enterprise_api_3p_access`
-- Python 3.10+ with stdlib only (scripts use `urllib`, `json`, `pathlib`)
-- **Config template:** `mba-setup`'s `assets/config.example.json` — reference only; use `mba-setup` to create config
+**Config gate (first step of every run):** check `workspace/mba/config.json` via `mba-get-started`'s verify command:
+```
+terminal(command="python3 <mba-get-started skill_dir>/scripts/mba_setup.py --verify", timeout=15)
+```
+- Exit 0 → config ready; proceed with this skill's procedure.
+- Exit 1 (missing/invalid config, or any script reports "Missing required env" / ConfigError) → load `skill_view(name="mba-get-started")` and follow it. That is the only next step; mba-get-started collects the two credentials (`META_ACCESS_TOKEN`, `META_ENTITY_ID`) from the user and writes the config. Resume this skill after verify passes.
+- **Operating context:** the end users are a non-technical ops team, and both credential values are provisioned to them separately by their IT team. Collect the supplied values; do not walk users through self-service System User token creation in Meta Business Manager unless they explicitly ask.
 
-### Missing Configuration
-If any script reports "Missing required env" or "ConfigError: Missing required env", **run the `mba-setup` skill immediately**:
-```
-skill_view(name="mba-setup")
-```
-Then follow the skill's guided setup to create `workspace/mba/config.json` with your `access_token` and `entity_id`. All MBA scripts auto-detect this config on subsequent runs.
+Scripts resolve config cwd-independently (HERMES_PROFILE_DIR env, else script location); no environment setup needed. Python 3.10+ stdlib only.
 
 ## How to Run
 All operations go through the `terminal` tool invoking the skill's Python scripts.
@@ -68,13 +63,17 @@ terminal(command="python3 scripts/mba_allowlist.py remove <entry_id> --yes", tim
 | Remove from allowlist | `terminal(command="python3 scripts/mba_allowlist.py remove <entry_id> --yes", timeout=30)` |
 
 ## Procedure
+### 0. Config gate
+- Run: `terminal(command="python3 <mba-get-started skill_dir>/scripts/mba_setup.py --verify", timeout=15)`
+- Completion: exit 0 (`✓ Config verification passed`). On exit 1, load and follow `mba-get-started` (it asks the user for the two credentials), then re-run verify before continuing.
+
 ### 1. Check eligibility
 - Run: `terminal(command="python3 scripts/mba_eligibility.py", timeout=30)`
-- Completion: JSON output contains `"eligible": true` and `"entity_id"` matching your `META_ENTITY_ID`.
+- Completion: JSON shows `is_eligible: true` (live API shape; older docs show `eligible`). An HTTP 200 proves the connection even when the flag is false.
 
 ### 2. Inspect current settings
 - Run: `terminal(command="python3 scripts/mba_settings.py get", timeout=30)`
-- Completion: Output shows `rollout.enabled`, `handoff.enabled`, `followup.enabled`, `ai_audience` — record these as baseline.
+- Completion: Output shows `rollout.enabled`, `followup.enabled`, `ai_audience` (plus `handoff.enabled` when present) — record these as baseline. The live response is an array of agent config objects.
 
 ### 3. Update settings (if needed)
 - **Settings schema:** load `references/agent-settings-rules.md` before drafting `/tmp/settings.json`.
@@ -95,16 +94,17 @@ terminal(command="python3 scripts/mba_allowlist.py remove <entry_id> --yes", tim
 - Completion: All three checks pass; agent is ready for knowledge/connector/runtime work.
 
 ## Pitfalls
+- **Placeholder config passes verify** — config.json is the only credential source (env vars are never read); dummy values pass `--verify` but fail API calls. Prove credentials with mba-get-started's `mba_status.py` (eligibility HTTP 200).
+- **api_version must exist on Meta** — "2.1.0" returns 404 "API version not found"; use the skill default "2.0.0" unless Meta documents otherwise.
 - **META_ENTITY_ID must be the Phone Number ID** — using the WABA ID returns 404 on all endpoints.
 - **500 on settings update can be partial success** — always re-run `get` to verify the write landed.
 - **Allowlist changes propagate asynchronously** — a newly added number may not be recognized for ~30 seconds.
 - **Missing token capabilities yield 403** — `bizai_wa_enterprise_api_3p_access` is required; `whatsapp_business_messaging` alone is insufficient.
 - **Destructive ops require `--yes`** — `allowlist remove` refuses without it; this is intentional.
 - **Unexpected 401/403/404:** load `references/common-api-requirements.md` for the shared error matrix and required token capability.
-- **Deprecated `.env`** — if scripts detect `.env` in cwd, they print a warning to migrate to `workspace/mba/config.json` via `mba-setup`.
 
 ## Verification
-- Eligibility check returns `{"eligible": true, "entity_id": "<META_ENTITY_ID>"}`
-- Settings get shows all four top-level keys: `rollout`, `handoff`, `followup`, `ai_audience`
+- Eligibility check returns HTTP 200 with `is_eligible: true` (or `eligible: true` on older payloads)
+- Settings get shows `rollout`, `followup`, `ai_audience` (and `handoff` when configured)
 - Allowlist list returns an array containing each test number with a stable `id`
 - No 401/403/404 errors on any of the above calls

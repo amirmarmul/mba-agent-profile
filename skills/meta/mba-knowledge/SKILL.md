@@ -8,7 +8,7 @@ platforms: [linux, macos, windows]
 metadata:
   hermes:
     tags: [meta-business-agent, whatsapp, ai-agent, knowledge, faq, skills]
-    related_skills: [mba-onboard, mba-connectors, mba-runtime, mba-setup]
+    related_skills: [mba-onboard, mba-connectors, mba-runtime, mba-get-started]
 ---
 
 # MBA Knowledge & Skills Operator
@@ -28,21 +28,15 @@ Don't use for:
 - Running test messages, evals, handoffs, events → use `mba-runtime`
 
 ## Prerequisites
-- Profile workspace config at `workspace/mba/config.json` (created by `mba-setup`)
-- If config missing: run `mba-setup` skill to create it
-- Token must have:
-  - Permission: `whatsapp_business_messaging`
-  - Capability: `bizai_wa_enterprise_api_3p_access`
-- Python 3.10+ with stdlib only (scripts use `urllib`, `json`, `pathlib`, `mimetypes`)
-- **Config template:** `mba-setup`'s `assets/config.example.json` — reference only; use `mba-setup` to create config
-- Payload templates in `assets/` — copy to `/tmp`, modify, pass via `--body-file`
+**Config gate (first step of every run):** check `workspace/mba/config.json` via `mba-get-started`'s verify command:
+```
+terminal(command="python3 <mba-get-started skill_dir>/scripts/mba_setup.py --verify", timeout=15)
+```
+- Exit 0 → config ready; proceed with this skill's procedure.
+- Exit 1 (missing/invalid config, or any script reports "Missing required env" / ConfigError) → load `skill_view(name="mba-get-started")` and follow it. That is the only next step; mba-get-started collects the two credentials (`META_ACCESS_TOKEN`, `META_ENTITY_ID`) from the user and writes the config. Resume this skill after verify passes.
 
-### Missing Configuration
-If any script reports "Missing required env" or "ConfigError: Missing required env", **run the `mba-setup` skill immediately**:
-```
-skill_view(name="mba-setup")
-```
-Then follow the skill's guided setup to create `workspace/mba/config.json` with your `access_token` and `entity_id`. All MBA scripts auto-detect this config on subsequent runs.
+Scripts resolve config cwd-independently (HERMES_PROFILE_DIR env, else script location); no environment setup needed. Python 3.10+ stdlib only.
+- Payload templates in `assets/` — copy to `/tmp`, modify, pass via `--body-file`
 
 ## How to Run
 All operations go through the `terminal` tool invoking the skill's Python scripts.
@@ -85,6 +79,10 @@ terminal(command="python3 scripts/mba_ui_skills.py list", timeout=30)
 | UI Skill delete | `terminal(command="python3 scripts/mba_ui_skills.py delete <id> --yes", timeout=30)` |
 
 ## Procedure
+### 0. Config gate
+- Run: `terminal(command="python3 <mba-get-started skill_dir>/scripts/mba_setup.py --verify", timeout=15)`
+- Completion: exit 0 (`✓ Config verification passed`). On exit 1, load and follow `mba-get-started` (it asks the user for the two credentials), then re-run verify before continuing.
+
 ### A. Knowledge: FAQs
 1. **List existing FAQs**
    - Run: `terminal(command="python3 scripts/mba_faq.py list", timeout=30)`

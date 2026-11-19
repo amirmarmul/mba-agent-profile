@@ -11,9 +11,16 @@ from pathlib import Path
 
 
 def _profile_workspace_config_path() -> Path:
-    """Return the profile workspace config path: <HERMES_PROFILE_DIR>/workspace/mba/config.json"""
-    profile_dir = os.getenv("HERMES_PROFILE_DIR") or os.getcwd()
-    return Path(profile_dir) / "workspace" / "mba" / "config.json"
+    """Return <profile>/workspace/mba/config.json.
+    Resolution order: HERMES_PROFILE_DIR env > script location (skills/meta/<skill>/scripts/) > cwd."""
+    env = os.getenv("HERMES_PROFILE_DIR")
+    if env:
+        return Path(env) / "workspace" / "mba" / "config.json"
+    here = Path(__file__).resolve()
+    for parent in here.parents:
+        if parent.name == "meta" and parent.parent.name == "skills":
+            return parent.parent.parent / "workspace" / "mba" / "config.json"
+    return Path(os.getcwd()) / "workspace" / "mba" / "config.json"
 
 
 def _prompt_if_tty(prompt: str, default: str = "") -> str:
@@ -163,28 +170,28 @@ Environment variables:
 
     # Gather credentials: CLI args > env vars > interactive prompts
     interactive = sys.stdin.isatty()
-    access_token = args.access_token or os.getenv("META_ACCESS_TOKEN", "").strip()
+    access_token = (args.access_token or "").strip()
     if not access_token:
         if not interactive:
-            print("ERROR: access token required (--access-token or META_ACCESS_TOKEN) in non-interactive mode.", file=sys.stderr)
+            print("ERROR: --access-token required. Ask the user for META_ACCESS_TOKEN in chat, then pass it explicitly.", file=sys.stderr)
             return 1
         access_token = _prompt_if_tty("META_ACCESS_TOKEN")
     while not access_token:
         print("Access token cannot be empty.", file=sys.stderr)
         access_token = _prompt_if_tty("META_ACCESS_TOKEN")
 
-    entity_id = args.entity_id or os.getenv("META_ENTITY_ID", "").strip()
+    entity_id = (args.entity_id or "").strip()
     if not entity_id:
         if not interactive:
-            print("ERROR: entity ID required (--entity-id or META_ENTITY_ID) in non-interactive mode.", file=sys.stderr)
+            print("ERROR: --entity-id required. Ask the user for META_ENTITY_ID in chat, then pass it explicitly.", file=sys.stderr)
             return 1
         entity_id = _prompt_if_tty("META_ENTITY_ID (WhatsApp Business Phone Number ID)")
     while not entity_id:
         print("Entity ID cannot be empty.", file=sys.stderr)
         entity_id = _prompt_if_tty("META_ENTITY_ID")
 
-    api_version = args.api_version or os.getenv("META_API_VERSION", "2.0.0").strip() or "2.0.0"
-    base_url = (args.base_url or os.getenv("META_BASE_URL", "https://api.facebook.com").strip() or "https://api.facebook.com").rstrip("/")
+    api_version = args.api_version or "2.0.0"
+    base_url = (args.base_url or "https://api.facebook.com").rstrip("/")
 
     # Validate entity_id is numeric
     if not entity_id.isdigit():
